@@ -11,9 +11,9 @@
 [x] One-command E2E run verified on this machine (outputs/full/run_log.txt)
 [ ] Gate 2 closed (results not yet reviewed by Kavyasri)
 [ ] Dockerfile builds and runs (not built locally)
-[ ] CI workflow green on GitHub
+[x] CI workflow green on GitHub
 [x] .env.example present, no real values (not applicable: no secrets or keys are used)
 [x] prepush-scan.sh passes
 [x] 10+ incremental commits
-[ ] Public repo created, pushed, remote HEAD == local HEAD
-[ ] Root README index updated
+[x] Public repo created, pushed, remote HEAD == local HEAD
+[x] Root README index updated
