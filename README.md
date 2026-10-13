@@ -131,7 +131,7 @@ What this says:
 | SARIMA(1,0,1)(0,1,1)7 | 0.262 | 0.259 | -8.5% | 48.1% | 2,169 |
 | XGBoost, global | **0.208** | **0.204** | -3.1% | **8.7%** | **1,304** |
 
-The classical models have a reasonable WAPE but run 9-10% low through the peak, so they book too
+The classical models have a reasonable WAPE but run 8.5-9.6% low through the peak, so they book too
 few trucks on half the peak depot-days. That bias, not the WAPE, is what a dispatcher feels.
 The disappointing part: in the replay, booking drivers from the seasonal-naive forecast instead of
 XGBoost changed the peak lead time by 0.001 days (1.051 vs 1.050). In the peak most depots were
