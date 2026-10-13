@@ -13,7 +13,7 @@
 [ ] Dockerfile builds and runs (not built locally)
 [ ] CI workflow green on GitHub
 [x] .env.example present, no real values (not applicable: no secrets or keys are used)
-[ ] prepush-scan.sh passes
-[ ] 10+ incremental commits
+[x] prepush-scan.sh passes
+[x] 10+ incremental commits
 [ ] Public repo created, pushed, remote HEAD == local HEAD
 [ ] Root README index updated
