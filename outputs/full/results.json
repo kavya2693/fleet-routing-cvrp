@@ -1,0 +1,11 @@
+{
+  "profile": "full",
+  "trucks": 300,
+  "depots": 4,
+  "zones": 40,
+  "dispatch_orders": 24394,
+  "solver_seconds_per_depot_day": 6.0,
+  "position_effect_logodds_per_stop": 0.09407839351102824,
+  "misroute_cost_km": 150.0,
+  "runtime_seconds": 1063.0
+}

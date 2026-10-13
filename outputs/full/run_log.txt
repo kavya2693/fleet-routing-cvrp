@@ -1,0 +1,39 @@
+[    0.0s] generating full data -> data/full
+[    3.3s] 40 zones, 300 trucks, 24394 dispatch orders
+[  147.2s] forecast backtest done
+         model period  wape   bias  zone_days
+           ets    all 0.260 -0.004       3360
+        sarima    all 0.262  0.011       3360
+seasonal_naive    all 0.344  0.035       3360
+       xgboost    all 0.208 -0.009       3360
+[  152.0s] risk model done, position effect 0.094 log-odds per stop
+   model period  roc_auc  pr_auc  recall_top10  brier  base_rate     n
+    rule    all    0.596   0.084         0.242    NaN      0.041 42453
+logistic    all    0.647   0.112         0.284  0.038      0.041 42453
+ xgboost    all    0.645   0.110         0.279  0.038      0.041 42453
+ ceiling    all    0.647   0.108         0.284    NaN      0.041 42453
+[  155.7s] quiet sweep                      km=   105490 trucks=1058 on_time= 79.9% misroute=3.07% lead=1.03d next_day=96.9%
+[  278.0s] quiet ortools                    km=    88698 trucks=1018 on_time=100.0% misroute=3.16% lead=1.03d next_day=96.8%
+[  400.6s] quiet ortools_risk               km=    91829 trucks=1059 on_time=100.0% misroute=2.98% lead=1.03d next_day=97.0%
+[  406.3s] peak  sweep                      km=   140683 trucks=1457 on_time= 81.6% misroute=4.41% lead=1.12d next_day=91.4%
+[  535.7s] peak  ortools                    km=   109607 trucks=1339 on_time=100.0% misroute=4.58% lead=1.05d next_day=94.9%
+[  665.8s] peak  ortools_risk               km=   113938 trucks=1370 on_time=100.0% misroute=4.39% lead=1.05d next_day=95.1%
+[  795.2s] peak  ortools_risk_500km         km=   118014 trucks=1379 on_time=100.0% misroute=4.32% lead=1.05d next_day=95.1%
+[  928.0s] peak  ortools_risk_2000km        km=   129783 trucks=1429 on_time=100.0% misroute=4.33% lead=1.05d next_day=95.1%
+[ 1062.0s] peak  ortools_risk_naive_roster  km=   114132 trucks=1362 on_time=100.0% misroute=4.42% lead=1.05d next_day=95.0%
+[ 1062.2s] address checks on top 5% by each ranking
+ranked_by  checked  misroute_pct  reduction_pct window
+     none        0         2.979          0.000  quiet
+   random      542         2.954          0.828  quiet
+     rule      542         2.629         11.721  quiet
+ logistic      542         2.658         10.765  quiet
+  xgboost      542         2.640         11.354  quiet
+  ceiling      542         2.643         11.264  quiet
+     none        0         4.387          0.000   peak
+   random      677         4.340          1.079   peak
+     rule      677         3.658         16.629   peak
+ logistic      677         3.694         15.806   peak
+  xgboost      677         3.668         16.384   peak
+  ceiling      677         3.681         16.100   peak
+[ 1063.0s] wrote outputs/full
+EXIT 0
