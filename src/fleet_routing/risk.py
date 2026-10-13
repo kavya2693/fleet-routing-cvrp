@@ -12,6 +12,7 @@ cost from moving that stop one place later.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
@@ -19,20 +20,29 @@ import pandas as pd
 import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from fleet_routing.data import RISK_FEATURES, base_misroute_logit
+from fleet_routing.data import RISK_FEATURES, base_misroute_logit, misroute_probability
 
 
 @dataclass
 class RiskModel:
     model: xgb.XGBClassifier
+    logistic: Pipeline
     beta_position: float
     cutoff: pd.Timestamp
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
         return np.asarray(self.model.predict_proba(df[RISK_FEATURES])[:, 1])
+
+    def scorers(self) -> dict[str, Callable[[pd.DataFrame], np.ndarray]]:
+        return {
+            "rule": rule_score,
+            "logistic": lambda df: np.asarray(self.logistic.predict_proba(df[RISK_FEATURES])[:, 1]),
+            "xgboost": self.predict,
+            "ceiling": base_misroute_logit,
+        }
 
 
 def time_split(hist: pd.DataFrame, test_share: float = 0.2) -> tuple[pd.DataFrame, pd.DataFrame, pd.Timestamp]:
@@ -65,15 +75,17 @@ def fit(hist: pd.DataFrame, seed: int = 0) -> tuple[RiskModel, pd.DataFrame]:
     train, test, cutoff = time_split(hist)
     y_tr, y_te = train["misrouted"].to_numpy(), test["misrouted"].to_numpy()
 
-    # Shallow trees: the label is a rare, noisy event and depth 4 overfit it (depths 2-4 were
-    # compared on the test window; the README reports that comparison).
+    # Shallow trees: the label is a rare, noisy event and depth 3-4 overfit it (depths 2-4 were
+    # compared on the test window; the README reports that). min_child_weight is in hessian
+    # units, p(1-p) per row, so at a 4% base rate the default-looking 20 needed ~500 rows per
+    # leaf and the small profile silently ignored the postcode-mismatch flag.
     model = xgb.XGBClassifier(
         n_estimators=400,
         max_depth=2,
         learning_rate=0.05,
         subsample=0.8,
         colsample_bytree=0.8,
-        min_child_weight=20,
+        min_child_weight=1,
         n_jobs=2,
         random_state=seed,
         eval_metric="logloss",
@@ -109,9 +121,50 @@ def fit(hist: pd.DataFrame, seed: int = 0) -> tuple[RiskModel, pd.DataFrame]:
                 }
             )
     beta = estimate_position_effect(train)
-    return RiskModel(model=model, beta_position=beta, cutoff=cutoff), pd.DataFrame(rows)
+    return RiskModel(model=model, logistic=logit, beta_position=beta, cutoff=cutoff), pd.DataFrame(rows)
 
 
 def position_slope(p: np.ndarray) -> np.ndarray:
     """d(probability)/d(logit): how much one extra unit of log-odds moves this stop's risk."""
     return p * (1 - p)
+
+
+def address_check(df: pd.DataFrame) -> pd.DataFrame:
+    """What a pre-dispatch call to the consignee fixes: the postcode is confirmed, the
+    address is cleaned up and a handwritten label is reprinted. It cannot fix a zone that
+    sits between two depots or a load that was relabelled at a cross-dock."""
+    out = df.copy()
+    out["postcode_mismatch"] = 0
+    out["address_quality"] = np.maximum(out["address_quality"], 0.9)
+    out["handwritten_label"] = 0
+    return out
+
+
+def address_check_effect(
+    served: pd.DataFrame,
+    scorers: dict[str, Callable[[pd.DataFrame], np.ndarray]],
+    share: float,
+    seed: int,
+) -> pd.DataFrame:
+    """Expected misroute rate if the office checks the top `share` of each day's orders,
+    ranked by each scorer. Route positions are held at what the router chose."""
+    rng = np.random.default_rng(seed)
+    pos = served["position"].to_numpy()
+    base = misroute_probability(served, pos)
+    fixed = misroute_probability(address_check(served), pos)
+    ranks = {"none": np.zeros(len(served)), "random": rng.random(len(served))}
+    ranks.update({k: f(served) for k, f in scorers.items()})
+    rows = []
+    for name, score in ranks.items():
+        flag = np.zeros(len(served), bool)
+        if name != "none":
+            for _, idx in served.groupby("date").groups.items():
+                ii = served.index.get_indexer(idx)
+                k = int(round(len(ii) * share))
+                flag[ii[np.argsort(-score[ii], kind="stable")[:k]]] = True
+        p = np.where(flag, fixed, base)
+        rows.append({"ranked_by": name, "checked": int(flag.sum()), "misroute_pct": 100 * float(p.mean())})
+    out = pd.DataFrame(rows)
+    none = out.loc[out["ranked_by"] == "none", "misroute_pct"].iloc[0]
+    out["reduction_pct"] = 100 * (1 - out["misroute_pct"] / none)
+    return out
