@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      - name: lint
+        run: uv run ruff check .
+
+      - name: format
+        run: uv run ruff format --check .
+
+      - name: types
+        run: uv run mypy
+
+      # No model server, no API key, no downloads: data comes from the seeded generator and
+      # every solver call is time-bounded.
+      - name: tests
+        run: uv run pytest -q
+
+      - name: end-to-end run, small profile
+        run: uv run fleet-routing --profile small --refresh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: small-run
+          path: outputs/small/
