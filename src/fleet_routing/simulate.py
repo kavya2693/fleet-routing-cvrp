@@ -29,14 +29,19 @@ class Arm:
 
 
 def fleet_caps(fleet: int) -> list[int]:
-    n_rigid = int(round(fleet * config.RIGID_SHARE))
+    n_rigid = round(fleet * config.RIGID_SHARE)
     return [config.TRAILER_PALLETS] * (fleet - n_rigid) + [config.RIGID_PALLETS] * n_rigid
 
 
 def roster_size(forecast_orders: float, fleet: int) -> int:
     caps = fleet_caps(fleet)
     mean_cap = float(np.mean(caps))
-    need = forecast_orders * config.MEAN_PALLETS_PER_STOP * config.ROSTER_HEADROOM / (mean_cap * config.ROSTER_FILL)
+    need = (
+        forecast_orders
+        * config.MEAN_PALLETS_PER_STOP
+        * config.ROSTER_HEADROOM
+        / (mean_cap * config.ROSTER_FILL)
+    )
     return int(min(fleet, max(1, math.ceil(need))))
 
 
@@ -139,7 +144,9 @@ def summarize(arm: str, window: str, n_orders: int, served: pd.DataFrame, routes
     }
 
 
-def roster_scores(fc: pd.DataFrame, actual: pd.DataFrame, zones: pd.DataFrame, depots: pd.DataFrame) -> pd.DataFrame:
+def roster_scores(
+    fc: pd.DataFrame, actual: pd.DataFrame, zones: pd.DataFrame, depots: pd.DataFrame
+) -> pd.DataFrame:
     """How each forecast would have booked drivers over the backtest, against what was needed.
 
     Shortfall (too few trucks booked) and idle trucks pull in opposite directions: a forecast
@@ -155,9 +162,13 @@ def roster_scores(fc: pd.DataFrame, actual: pd.DataFrame, zones: pd.DataFrame, d
         dfc = depot_forecast(fc, zones, model).stack().rename("forecast")
         df = pd.concat([dfc, act], axis=1, join="inner").reset_index()
         df = df[pd.DatetimeIndex(df["date"]).dayofweek < 5]
-        booked = np.array([roster_size(f, int(fleet[d])) for f, d in zip(df["forecast"], df["depot"], strict=True)])
+        booked = np.array(
+            [roster_size(f, int(fleet[d])) for f, d in zip(df["forecast"], df["depot"], strict=True)]
+        )
         mean_cap = df["depot"].map(lambda d: float(np.mean(fleet_caps(int(fleet[d]))))).to_numpy()
-        need = np.ceil(df["actual"].to_numpy() * config.MEAN_PALLETS_PER_STOP / (mean_cap * config.ROSTER_FILL))
+        need = np.ceil(
+            df["actual"].to_numpy() * config.MEAN_PALLETS_PER_STOP / (mean_cap * config.ROSTER_FILL)
+        )
         need = np.minimum(need, df["depot"].map(fleet).to_numpy())
         peak = is_peak(pd.DatetimeIndex(df["date"]))
         for period, mask in (("all", np.ones(len(df), bool)), ("peak", peak), ("non_peak", ~peak)):

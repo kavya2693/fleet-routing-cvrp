@@ -45,7 +45,9 @@ class RiskModel:
         }
 
 
-def time_split(hist: pd.DataFrame, test_share: float = 0.2) -> tuple[pd.DataFrame, pd.DataFrame, pd.Timestamp]:
+def time_split(
+    hist: pd.DataFrame, test_share: float = 0.2
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Timestamp]:
     """Train on the past, test on the most recent dates, so the test set includes a peak."""
     dates = np.sort(hist["date"].unique())
     cutoff = pd.Timestamp(dates[int(len(dates) * (1 - test_share))])
@@ -160,7 +162,7 @@ def address_check_effect(
         if name != "none":
             for _, idx in served.groupby("date").groups.items():
                 ii = served.index.get_indexer(idx)
-                k = int(round(len(ii) * share))
+                k = round(len(ii) * share)
                 flag[ii[np.argsort(-score[ii], kind="stable")[:k]]] = True
         p = np.where(flag, fixed, base)
         rows.append({"ranked_by": name, "checked": int(flag.sum()), "misroute_pct": 100 * float(p.mean())})

@@ -32,11 +32,23 @@ def route_map(
             ax.plot(xs, ys, lw=0.8, color=cmap(k % 20), alpha=0.8)
         ax.scatter(df["x"], df["y"], s=7, color="#555555", zorder=3)
         risky = df[df["p_pred"] >= risk_cut]
-        ax.scatter(risky["x"], risky["y"], s=28, facecolors="none", edgecolors="#c0392b", lw=1.1, zorder=4,
-                   label=f"high predicted misroute risk ({len(risky)})")
+        ax.scatter(
+            risky["x"],
+            risky["y"],
+            s=28,
+            facecolors="none",
+            edgecolors="#c0392b",
+            lw=1.1,
+            zorder=4,
+            label=f"high predicted misroute risk ({len(risky)})",
+        )
         ax.scatter([depot_xy[0]], [depot_xy[1]], marker="s", s=80, color="black", zorder=5, label="depot")
         km = sum(
-            float(np.hypot(np.diff([depot_xy[0], *g["x"], depot_xy[0]]), np.diff([depot_xy[1], *g["y"], depot_xy[1]])).sum())
+            float(
+                np.hypot(
+                    np.diff([depot_xy[0], *g["x"], depot_xy[0]]), np.diff([depot_xy[1], *g["y"], depot_xy[1]])
+                ).sum()
+            )
             for _, g in df.sort_values("position").groupby("vehicle")
         )
         mean_risky_pos = float(risky["position"].mean()) if len(risky) else float("nan")

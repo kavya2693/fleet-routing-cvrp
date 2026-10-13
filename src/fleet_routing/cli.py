@@ -1,7 +1,7 @@
 """One command, end to end: data, forecasts, risk model, routing replay, report.
 
-    fleet-routing --profile small      # CI-sized, about a minute
-    fleet-routing --profile full       # 300 trucks, four depots; 20-30 minutes on a laptop
+fleet-routing --profile small      # CI-sized, about a minute
+fleet-routing --profile full       # 300 trucks, four depots; 20-30 minutes on a laptop
 """
 
 from __future__ import annotations
@@ -32,7 +32,8 @@ def _arms(p: Profile) -> tuple[list[simulate.Arm], list[simulate.Arm]]:
     # Peak window only: what the router gives up as misroutes are priced higher, and how much
     # of the lead-time result comes from the forecast that booked the drivers.
     extra = [
-        simulate.Arm(f"ortools_risk_{int(c)}km", "ortools", misroute_cost_km=c) for c in config.MISROUTE_COST_SWEEP_KM
+        simulate.Arm(f"ortools_risk_{int(c)}km", "ortools", misroute_cost_km=c)
+        for c in config.MISROUTE_COST_SWEEP_KM
     ] + [
         simulate.Arm(
             "ortools_risk_naive_roster",
@@ -51,7 +52,10 @@ def run(p: Profile, data_dir: Path, out: Path, refresh: bool) -> dict:
         generate(p, data_dir)
     ds: Dataset = load(data_dir)
     out.mkdir(parents=True, exist_ok=True)
-    _log(f"{len(ds.zones)} zones, {int(ds.depots['vehicles'].sum())} trucks, {len(ds.orders)} dispatch orders", t0)
+    _log(
+        f"{len(ds.zones)} zones, {int(ds.depots['vehicles'].sum())} trucks, {len(ds.orders)} dispatch orders",
+        t0,
+    )
 
     fc = forecast.backtest(ds.demand_observed, p.history_end, p.backtest_weeks)
     fscores = forecast.score(fc, ds.demand_true)
@@ -111,7 +115,10 @@ def run(p: Profile, data_dir: Path, out: Path, refresh: bool) -> dict:
     busiest = int(ds.depots.sort_values("vehicles").iloc[-1]["depot"])
     dep = ds.depots.set_index("depot").loc[busiest]
     panels = []
-    for arm_name, label in (("sweep", "Sweep + nearest neighbour"), ("ortools_risk", "OR-Tools CVRPTW, risk-priced")):
+    for arm_name, label in (
+        ("sweep", "Sweep + nearest neighbour"),
+        ("ortools_risk", "OR-Tools CVRPTW, risk-priced"),
+    ):
         d = delivered[(arm_name, window)]
         panels.append((label, d[(d["dispatch_date"] == first_dispatch) & (d["depot"] == busiest)]))
     plot.route_map(

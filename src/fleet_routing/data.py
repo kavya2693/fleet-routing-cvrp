@@ -103,7 +103,7 @@ def build_network(p: Profile, rng: np.random.Generator) -> Network:
     w, h = p.region_km
     # Two thirds of zones cluster around depots (the towns depots were sited for); the rest
     # are spread across the rural part of the region.
-    n_town = int(round(p.n_zones * 2 / 3))
+    n_town = round(p.n_zones * 2 / 3)
     anchor = rng.integers(0, len(depots), n_town)
     town = depots[["x", "y"]].to_numpy()[anchor] + rng.normal(0, 18, (n_town, 2))
     rural = rng.uniform([8, 8], [w - 8, h - 8], (p.n_zones - n_town, 2))
@@ -281,8 +281,12 @@ def dispatch_orders(p: Profile, net: Network, true: pd.DataFrame) -> pd.DataFram
             df["depot"] = z["depot"].to_numpy()
             kind = rng.choice(4, size=n, p=[0.45, 0.20, 0.20, 0.15])
             narrow_start = rng.integers(8, 16, n) * 60
-            df["tw_start"] = np.select([kind == 0, kind == 1, kind == 2], [8 * 60, 8 * 60, 12 * 60], narrow_start)
-            df["tw_end"] = np.select([kind == 0, kind == 1, kind == 2], [17 * 60, 12 * 60, 17 * 60], narrow_start + 120)
+            df["tw_start"] = np.select(
+                [kind == 0, kind == 1, kind == 2], [8 * 60, 8 * 60, 12 * 60], narrow_start
+            )
+            df["tw_end"] = np.select(
+                [kind == 0, kind == 1, kind == 2], [17 * 60, 12 * 60, 17 * 60], narrow_start + 120
+            )
             df["service_min"] = config.SERVICE_BASE_MIN + config.SERVICE_PER_PALLET_MIN * df["pallets"]
             rows.append(df)
     orders = pd.concat(rows, ignore_index=True)
@@ -310,7 +314,7 @@ def generate(p: Profile, out: Path) -> dict[str, int]:
         "history_days": len(true),
         "missing_zone_days": int(observed.isna().sum().sum()),
         "history_shipments": len(hist),
-        "history_misroute_rate_bp": int(round(hist["misrouted"].mean() * 10_000)),
+        "history_misroute_rate_bp": round(hist["misrouted"].mean() * 10_000),
         "dispatch_orders": len(orders),
     }
     (out / "manifest.json").write_text(json.dumps({"profile": p.name, "seed": p.seed, **summary}, indent=2))

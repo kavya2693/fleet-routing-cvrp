@@ -1,4 +1,4 @@
-"""Generate the seeded dataset for a profile: `make data` or `python scripts/generate_data.py --profile small`."""
+"""Generate the seeded dataset for a profile (`make data`, or `--profile small` for the CI size)."""
 
 from __future__ import annotations
 

@@ -215,7 +215,7 @@ def ortools_plan(
         routing.AddConstantDimension(1, n + 1, True, "position")
         pdim = routing.GetDimensionOrDie("position")
         for i in range(n):
-            coef = int(round(float(s.at[i, "risk_slope"]) * risk_weight * DIST_UNITS_PER_KM))
+            coef = round(float(s.at[i, "risk_slope"]) * risk_weight * DIST_UNITS_PER_KM)
             if coef > 0:
                 # Cumul at a stop is its 1-based position; anything past the first stop pays.
                 pdim.SetCumulVarSoftUpperBound(manager.NodeToIndex(i + 1), 1, coef)
