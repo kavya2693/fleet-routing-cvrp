@@ -23,7 +23,7 @@ class Profile:
     history_end: date
     weekday_orders: int
     n_history_shipments: int
-    # Consecutive order days replayed through the dispatcher, one quiet and one peak week.
+    # Consecutive order days (Mon-Fri) replayed through the dispatcher, one quiet and one peak week.
     eval_windows: tuple[tuple[date, date], ...]
     backtest_weeks: int
     solver_seconds: float
@@ -40,7 +40,7 @@ FULL = Profile(
     history_end=date(2025, 12, 31),
     weekday_orders=2000,
     n_history_shipments=200_000,
-    eval_windows=((date(2025, 10, 13), date(2025, 10, 18)), (date(2025, 12, 8), date(2025, 12, 13))),
+    eval_windows=((date(2025, 10, 13), date(2025, 10, 17)), (date(2025, 12, 8), date(2025, 12, 12))),
     backtest_weeks=12,
     solver_seconds=6.0,
 )
@@ -83,9 +83,13 @@ ROSTER_HEADROOM = 1.10
 ROSTER_FILL = 0.85
 MEAN_PALLETS_PER_STOP = 2.1
 
-# Misroute handling: a shipment the model ranks risky should be delivered early in the
-# route. Stops past this index pay a soft penalty proportional to predicted risk.
-RISK_EARLY_STOPS = 3
-RISK_PENALTY_PER_STOP = 400_000  # in units of 100 m, scaled by risk probability
-# A misrouted shipment is re-delivered the next day.
+# Misroute handling. A misrouted shipment is re-delivered the next day. Its cost in km
+# (second trip, handling, service credit) is an assumption, not a measured figure; the
+# run sweeps it to show what the router trades for each setting.
 MISROUTE_DELAY_DAYS = 1
+MISROUTE_COST_KM = 150.0
+MISROUTE_COST_SWEEP_KM = (500.0, 2000.0)
+# The dispatch office can phone this share of each day's consignees before loading.
+ADDRESS_CHECK_SHARE = 0.05
+# Orders still undelivered this many days after a window closes are counted, not chased.
+CLEAR_OUT_DAYS = 3
