@@ -8,7 +8,7 @@ data-small:
 
 # Full size: 300 trucks, four depots, ~2,000 orders a weekday. 20-30 minutes on a laptop.
 run:
-	uv run fleet-routing --profile full --refresh 2>&1 | tee outputs/full/run_log.txt
+	mkdir -p outputs/full && uv run fleet-routing --profile full --refresh 2>&1 | tee outputs/full/run_log.txt
 
 # CI size: one depot, 12 trucks. About a minute.
 run-small:
