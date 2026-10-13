@@ -92,6 +92,13 @@ def run_window(
             else:
                 weight = arm.misroute_cost_km * risk_weight_per_km
                 plan = ortools_plan(inst, solver_seconds, risk_weight=weight)
+                if plan.solve_seconds > 3 * solver_seconds:
+                    # The limit is wall-clock; on a starved machine it can overrun. Say so.
+                    print(
+                        f"  slow solve: {arm.name} depot {dep['depot']} {dispatch_day.date()} "
+                        f"n={inst.n} took {plan.solve_seconds:.0f}s",
+                        flush=True,
+                    )
             st, rt = replay(inst, plan)
             served = stops.loc[st["stop"].to_numpy()].reset_index(drop=True)
             served["position"] = st["position"].to_numpy()
