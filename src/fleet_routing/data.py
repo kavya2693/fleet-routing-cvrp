@@ -153,7 +153,7 @@ def zone_demand(p: Profile, net: Network, rng: np.random.Generator) -> tuple[pd.
     is_hol = np.array([d.date() in hols for d in days])
     hol[is_hol] = 0.12
     # The next working day catches up most of what the holiday did not ship.
-    for i in np.flatnonzero(is_hol):
+    for i in np.flatnonzero(is_hol).tolist():
         j = i + 1
         while j < len(days) and (is_hol[j] or days[j].dayofweek >= 5):
             j += 1

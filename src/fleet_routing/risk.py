@@ -57,7 +57,7 @@ def time_split(
 def _recall_at(y: np.ndarray, score: np.ndarray, share: float) -> float:
     k = max(1, int(len(score) * share))
     top = np.argsort(-score, kind="stable")[:k]
-    return float(y[top].sum() / max(1, y.sum()))
+    return float(y[top].sum()) / max(1.0, float(y.sum()))
 
 
 def rule_score(df: pd.DataFrame) -> np.ndarray:
