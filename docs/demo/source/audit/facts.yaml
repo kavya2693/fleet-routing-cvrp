@@ -1,0 +1,443 @@
+# Audit facts for the fleet-routing-cvrp demo video.
+# Read by docs/demo/source/tools/build_audit_report.py.
+#
+# Check expressions are Python, evaluated with these helpers (paths relative to the repo root;
+# a "demo:" prefix means relative to the demo project folder):
+#   R(path) -> pandas DataFrame from CSV      J(path) -> parsed JSON
+#   row(path, **eq) -> the single CSV row matching all equalities (a pandas Series)
+#   T(path) -> file text                      grep(path, regex) -> True/False
+# A check passes when fmt.format(value) == expect (or, with fmt "bool", when value is True).
+
+project:
+  name: fleet-routing-cvrp
+  title: "fleet-routing-cvrp: demo video audit report"
+  repo_url: https://github.com/kavya2693/fleet-routing-cvrp
+  repo_dir: ../../../..          # paths are relative to this file
+  demo_dir: ..
+  demo_display: docs/demo/source
+  out_dir: ../..
+  video: docs/demo/demo.mp4
+  video_duration_s: 84.0
+  outputs_dir: outputs/full
+  venv_python: .venv/bin/python
+  version_packages: [ortools, xgboost, pandas, numpy, statsmodels, sklearn]
+  regenerate:
+    - "make run                                   # outputs/full/*.csv, results.json, route_map.png (~18 min)"
+    - "python3 docs/demo/source/tools/darkmap.py outputs/full/route_map.png docs/demo/source/assets"
+    - "PYTHONPATH=src .venv/bin/python docs/demo/source/tools/export_dispatch_sheet.py docs/demo/source/assets/dispatch_sheet.json"
+    - "python3 docs/demo/source/tools/inject_sheet.py docs/demo/source/assets/dispatch_sheet.json docs/demo/source/compositions/value.html --rows 12,24,30,34,38,53 --animate 24,30,34,53"
+    - "cd docs/demo/source && npx --yes hyperframes@0.8.156 check && npx --yes hyperframes@0.8.156 render -f 30 -q looks -o renders/fleet-routing-cvrp-master.mp4 && cd -"
+    - "ffmpeg -y -i docs/demo/source/renders/fleet-routing-cvrp-master.mp4 -c:v libx264 -preset slow -crf 25 -pix_fmt yuv420p -movflags +faststart -an docs/demo/demo.mp4"
+    - "python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/facts.yaml   # stills, checks, MD/DOCX/PDF"
+  seeds: {profile: full, seed: 7, risk_model_seed: 7}
+  run_time: "results.json runtime_seconds = 1063 s (about 17.7 min) for make run on the author's laptop"
+
+assumptions:
+  - id: A-01
+    statement: "All data is synthetic, produced by a seeded generator sized to the production problem (300 trucks, 4 depots, 40 zones, 2 years of demand, 200,000 historical shipments). The production data is proprietary."
+    source: "src/fleet_routing/config.py:32-46 (FULL profile, seed=7); scripts/generate_data.py; README 'The data'"
+    figures: [F-03, F-04, F-05, F-16, F-17, F-18]
+    all_figures: true
+    edit: ["src/fleet_routing/config.py (FULL profile)", "src/fleet_routing/data.py"]
+    rerun: ["make data", "make run"]
+  - id: A-02
+    statement: "Misroute risk rises with route position: the generator adds 0.09 log-odds per stop past the first, capped at 15 stops. The pipeline re-estimates it from history (0.094)."
+    source: "src/fleet_routing/data.py:238-241 (position_logit); README 'Known limitations' (biggest gap)"
+    figures: [F-13, F-14, F-15, F-19, F-46, F-47, F-48, F-49]
+    edit: ["src/fleet_routing/data.py:241"]
+    rerun: ["make data", "make run"]
+  - id: A-03
+    statement: "A misroute is priced at 150 km inside the risk-priced router (cost per stop = 150 km x 0.094 x p(1-p) per position past the first)."
+    source: "src/fleet_routing/config.py:90 (MISROUTE_COST_KM = 150.0); README 'The approach'"
+    figures: [F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36]
+    edit: ["src/fleet_routing/config.py:90"]
+    rerun: ["make run", "export_dispatch_sheet.py + inject_sheet.py"]
+  - id: A-04
+    statement: "Each OR-Tools solve is capped at 6 s wall-clock per depot-day (1.5 s on the small profile). Results vary slightly run to run and with machine load."
+    source: "src/fleet_routing/config.py:45 (solver_seconds=6.0); routing.py:231; README 'Known limitations'"
+    figures: [F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40]
+    edit: ["src/fleet_routing/config.py:45"]
+    rerun: ["make run", "export_dispatch_sheet.py + inject_sheet.py"]
+  - id: A-05
+    statement: "Distances are straight lines x 1.3 (circuity) at a flat 50 km/h. No road network, traffic or driver breaks."
+    source: "src/fleet_routing/config.py:74 (SPEED_KMH = 50.0), :76 (CIRCUITY = 1.3); README 'Known limitations'"
+    figures: [F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36]
+    edit: ["src/fleet_routing/config.py:74-76"]
+    rerun: ["make run", "export_dispatch_sheet.py + inject_sheet.py"]
+  - id: A-06
+    statement: "Drivers leave the depot from 06:00 and must be back by 18:00."
+    source: "src/fleet_routing/config.py:72-73 (SHIFT_START, SHIFT_END); routing.py:205"
+    figures: [F-07, F-36]
+    edit: ["src/fleet_routing/config.py:72-73"]
+    rerun: ["make run", "export_dispatch_sheet.py + inject_sheet.py"]
+  - id: A-07
+    statement: "Delivery windows are hard constraints in OR-Tools (it drops a stop rather than arrive late) and are ignored by the sweep baseline, so the on-time comparison is lopsided by design."
+    source: "src/fleet_routing/routing.py:205-225; README 'Known limitations'"
+    figures: [F-11, F-34]
+    edit: ["src/fleet_routing/routing.py"]
+    rerun: ["make run"]
+  - id: A-08
+    statement: "A pre-dispatch call fixes the postcode, address and handwritten-label faults completely; it cannot fix a between-depots zone or a cross-dock relabel."
+    source: "src/fleet_routing/risk.py:134-142 (address_check); README 'Known limitations'"
+    figures: [F-46, F-47, F-48, F-49]
+    edit: ["src/fleet_routing/risk.py:134-142"]
+    rerun: ["make run"]
+  - id: A-09
+    statement: "The dispatch office calls the top 5% of each day's consignees."
+    source: "src/fleet_routing/config.py:93 (ADDRESS_CHECK_SHARE = 0.05)"
+    figures: [F-21, F-46, F-47, F-48, F-49]
+    edit: ["src/fleet_routing/config.py:93"]
+    rerun: ["make run"]
+  - id: A-10
+    statement: "Trucks booked per depot-day = ceil(forecast orders x 2.1 pallets/stop x 1.10 headroom / (mean capacity x 0.85 fill)), capped at the depot fleet."
+    source: "src/fleet_routing/simulate.py:36-45 (roster_size); config.py:82-84"
+    figures: [F-44, F-45, F-32]
+    edit: ["src/fleet_routing/config.py:82-84"]
+    rerun: ["make run"]
+  - id: A-11
+    statement: "Fleet mix: 70% tractors with 26 pallets, 30% rigids with 14 pallets; depot fleets 63 / 86 / 47 / 104."
+    source: "src/fleet_routing/config.py:67-69; data/full/depots.csv"
+    figures: [F-03, F-23, F-25, F-32, F-36]
+    edit: ["src/fleet_routing/config.py:67-69"]
+    rerun: ["make data", "make run"]
+  - id: A-12
+    statement: "Evaluation windows: quiet week 2025-10-13..17 and peak week 2025-12-08..12 (orders Mon-Fri, dispatched the next day, leftovers carried, up to 3 clear-out days)."
+    source: "src/fleet_routing/config.py:43, :95 (CLEAR_OUT_DAYS = 3)"
+    figures: [F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40]
+    edit: ["src/fleet_routing/config.py:43"]
+    rerun: ["make run"]
+  - id: A-13
+    statement: "Forecasts are backtested from 12 weekly (Monday) origins over the last 12 weeks of 2025; every feature is at least a week old."
+    source: "src/fleet_routing/config.py:40, :44; forecast.py:166-183"
+    figures: [F-10, F-41, F-42, F-43, F-44, F-45]
+    edit: ["src/fleet_routing/config.py:44"]
+    rerun: ["make run"]
+  - id: A-14
+    statement: "Router cost terms: a dropped stop costs 1,000 km x (1 + days waited); each truck used costs 40 km."
+    source: "src/fleet_routing/routing.py:32 (DROP_PENALTY_KM), :34 (VEHICLE_FIXED_KM)"
+    figures: [F-25, F-26, F-30, F-35, F-40]
+    edit: ["src/fleet_routing/routing.py:32-34"]
+    rerun: ["make run"]
+  - id: A-15
+    statement: "Video rounding: percentages to 1 decimal, km and counts to whole numbers with thousands separators, WAPE and AUC to 3 decimals; '24k', '200k', '~18 min' are rounded labels."
+    source: "this audit (display convention)"
+    figures: [F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-46, F-47, F-48, F-49, F-50, F-51, F-52, F-54]
+    edit: ["the composition file named on each slide"]
+    rerun: ["hyperframes render"]
+  - id: A-16
+    statement: "Slide 01 (industry, everyday problems) is general logistics knowledge used as context. It is not a result of this repo and carries no numbers."
+    source: "author's framing; README 'The problem' supports problems 2-4"
+    figures: [F-01, F-02]
+    edit: ["compositions/s01-context.html"]
+    rerun: ["hyperframes render"]
+
+figures:
+  # ---- slide 01
+  - {id: F-01, slides: ["01"], label: "Industries that relate: regional freight & 3PL carriers, parcel & retail distribution, grocery & e-commerce fleets", shown: "3 industry chips", type: general-knowledge, source: "author's framing", key: "-", formula: "-", manual: "Context statement, not a repo output."}
+  - {id: F-02, slides: ["01"], label: "Four everyday problems (manual routing; windows vs capacity; misroutes cost a second trip; peak outgrows fleet)", shown: "4 problem cards", type: general-knowledge, source: "README 'The problem' (problems 2-4)", key: "README lines 16-27", formula: "-",
+     check: {expr: "grep('README.md', r'costs a second delivery') and grep('README.md', r'books too few') and grep('README.md', r'delivery window|delivery windows')", fmt: bool}}
+  # ---- slide 02
+  - {id: F-03, slides: ["02", "05", "08"], label: "Fleet size", shown: "300 trucks", type: direct, source: "outputs/full/results.json", key: "trucks", formula: "-",
+     check: {expr: "J('outputs/full/results.json')['trucks']", fmt: "{:d}", expect: "300"}}
+  - {id: F-04, slides: ["02", "08"], label: "Depots", shown: "4 depots", type: direct, source: "outputs/full/results.json", key: "depots", formula: "-",
+     check: {expr: "J('outputs/full/results.json')['depots']", fmt: "{:d}", expect: "4"}}
+  - {id: F-05, slides: ["02"], label: "Orders on the busiest day", shown: "Up to 2,800 orders a day", type: derived, source: "data/full/dispatch_orders.csv", key: "orders per date (max = 2,785 on 2025-12-08)", formula: "max daily order count = 2,785, rounded up to the nearest hundred = 2,800",
+     check: {expr: "(lambda m: 2700 < m <= 2800)(int(R('data/full/dispatch_orders.csv').groupby('date').size().max()))", fmt: bool},
+     note: "Peak-week days have 2,622-2,785 orders. The README describes the peak as 'closer to 2,700' a day (an average); the slide states the upper bound."}
+  - {id: F-06, slides: ["02"], label: "Every stop has a delivery window", shown: "every stop has a delivery window", type: direct, source: "data/full/dispatch_orders.csv", key: "tw_start, tw_end (no missing values)", formula: "count of missing windows = 0",
+     check: {expr: "int(R('data/full/dispatch_orders.csv')[['tw_start','tw_end']].isna().sum().sum()) == 0", fmt: bool}}
+  - {id: F-07, slides: ["02"], label: "Trailer capacity and shift limits are constraints", shown: "trailer capacity + shift limits", type: direct, source: "src/fleet_routing/routing.py:202, :205", key: "capacity + time dimensions", formula: "-",
+     check: {expr: "grep('src/fleet_routing/routing.py', r'AddDimensionWithVehicleCapacity') and grep('src/fleet_routing/routing.py', r'config.SHIFT_END')", fmt: bool}}
+  - {id: F-08, slides: ["02"], label: "Peak misroute base rate", shown: ">5% of peak shipments misrouted", type: direct, source: "outputs/full/risk_scores.csv; README line 26-27", key: "model=xgboost, period=peak, base_rate (0.0531)", formula: "base_rate x 100 = 5.3% > 5%",
+     check: {expr: "row('outputs/full/risk_scores.csv', model='xgboost', period='peak')['base_rate'] * 100 > 5", fmt: bool}}
+  # ---- slide 03
+  - {id: F-09, slides: ["03", "05"], label: "Solver time limit per depot-day", shown: "OR-Tools, 6 s per depot / solve budget 6.0 s", type: direct, source: "outputs/full/results.json", key: "solver_seconds_per_depot_day", formula: "-",
+     check: {expr: "J('outputs/full/results.json')['solver_seconds_per_depot_day']", fmt: "{:.1f}", expect: "6.0"}}
+  - {id: F-10, slides: ["03"], label: "Forecast and driver booking happen every Monday", shown: "EVERY MONDAY", type: direct, source: "README line 43", key: "README", formula: "-",
+     check: {expr: "grep('README.md', r'made every Monday')", fmt: bool}}
+  - {id: F-11, slides: ["03"], label: "Routes out: windows kept, fewer km, fewer trucks (risk-priced OR-Tools vs sweep, peak week)", shown: "windows kept / fewer km / fewer trucks", type: derived, source: "outputs/full/routing_summary.csv", key: "arm in {sweep, ortools_risk}, window=peak: on_time_pct, total_km, vehicle_days", formula: "on_time_pct = 100; total_km(ortools_risk) < total_km(sweep); vehicle_days(ortools_risk) < vehicle_days(sweep)",
+     check: {expr: "(lambda s, o: o['on_time_pct'] == 100 and o['total_km'] < s['total_km'] and o['vehicle_days'] < s['vehicle_days'])(row('outputs/full/routing_summary.csv', arm='sweep', window='peak'), row('outputs/full/routing_summary.csv', arm='ortools_risk', window='peak'))", fmt: bool}}
+  - {id: F-12, slides: ["03"], label: "Optimizer loop: build a first plan, then improve it", shown: "build, score, improve", type: direct, source: "src/fleet_routing/routing.py:229-230", key: "PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH", formula: "-",
+     check: {expr: "grep('src/fleet_routing/routing.py', r'PATH_CHEAPEST_ARC') and grep('src/fleet_routing/routing.py', r'GUIDED_LOCAL_SEARCH')", fmt: bool}}
+  # ---- slide 04
+  - {id: F-13, slides: ["04"], label: "Later stops are riskier (deeper in the trailer)", shown: "Later stops are riskier", type: direct, source: "src/fleet_routing/data.py:238-241; outputs/full/results.json position_effect_logodds_per_stop", key: "0.09 generated, 0.094 estimated", formula: "estimated slope > 0",
+     check: {expr: "J('outputs/full/results.json')['position_effect_logodds_per_stop'] > 0", fmt: bool}}
+  - {id: F-14, slides: ["04"], label: "Misroute change from pricing risk (peak, vs plain OR-Tools)", shown: "-4.2% misroutes", type: derived, source: "outputs/full/routing_summary.csv", key: "window=peak, misroute_pct: ortools_risk 4.3871, ortools 4.5810", formula: "(4.3871 - 4.5810) / 4.5810 x 100 = -4.23%",
+     check: {expr: "(row('outputs/full/routing_summary.csv', arm='ortools_risk', window='peak')['misroute_pct'] / row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['misroute_pct'] - 1) * 100", fmt: "{:+.1f}%", expect: "-4.2%"}}
+  - {id: F-15, slides: ["04"], label: "Extra km from pricing risk (peak, vs plain OR-Tools)", shown: "+4.0% km", type: derived, source: "outputs/full/routing_summary.csv", key: "window=peak, total_km: ortools_risk 113,937.7, ortools 109,607.3", formula: "(113,937.7 - 109,607.3) / 109,607.3 x 100 = +3.95%",
+     check: {expr: "(row('outputs/full/routing_summary.csv', arm='ortools_risk', window='peak')['total_km'] / row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['total_km'] - 1) * 100", fmt: "{:+.1f}%", expect: "+4.0%"}}
+  # ---- slide 05
+  - {id: F-16, slides: ["05", "08"], label: "Zone demand history", shown: "2 yrs x 40 zones", type: direct, source: "data/full/zone_demand.csv; outputs/full/results.json zones", key: "731 daily rows 2024-01-01..2025-12-31; zones = 40", formula: "-",
+     check: {expr: "len(R('data/full/zone_demand.csv')) == 731 and J('outputs/full/results.json')['zones'] == 40", fmt: bool}}
+  - {id: F-17, slides: ["05"], label: "Shipment history size", shown: "200k history", type: direct, source: "data/full/shipments_history.csv", key: "row count", formula: "-",
+     check: {expr: "len(R('data/full/shipments_history.csv'))", fmt: "{:,d}", expect: "200,000"}}
+  - {id: F-18, slides: ["05"], label: "Dispatch orders (both replayed weeks)", shown: "24k", type: direct, source: "outputs/full/results.json", key: "dispatch_orders = 24,394", formula: "24,394 rounded to thousands",
+     check: {expr: "round(J('outputs/full/results.json')['dispatch_orders'] / 1000)", fmt: "{:d}k", expect: "24k"}}
+  - {id: F-19, slides: ["05"], label: "Estimated position effect", shown: "+0.094 log-odds / stop", type: direct, source: "outputs/full/results.json", key: "position_effect_logodds_per_stop", formula: "-",
+     check: {expr: "J('outputs/full/results.json')['position_effect_logodds_per_stop']", fmt: "{:.3f}", expect: "0.094"}}
+  - {id: F-20, slides: ["05"], label: "Every pipeline box exists in the code", shown: "forecast.py, risk.py, simulate.py, routing.py, replay(), data.py", type: direct, source: "src/fleet_routing/", key: "files + def replay", formula: "-",
+     check: {expr: "all(grep('src/fleet_routing/' + f, p) for f, p in [('forecast.py', r'def backtest'), ('risk.py', r'def fit'), ('risk.py', r'def address_check'), ('simulate.py', r'def roster_size'), ('routing.py', r'def ortools_plan'), ('routing.py', r'def replay'), ('data.py', r'def generate')])", fmt: bool}}
+  - {id: F-21, slides: ["05", "09"], label: "Share of consignees called", shown: "call top 5% before loading", type: direct, source: "src/fleet_routing/config.py:93", key: "ADDRESS_CHECK_SHARE = 0.05", formula: "-",
+     check: {expr: "grep('src/fleet_routing/config.py', r'ADDRESS_CHECK_SHARE = 0.05')", fmt: bool}}
+  # ---- slide 06
+  - {id: F-22, slides: ["06"], label: "Map: depot and day", shown: "Depot 3 · dispatch 2025-12-09", type: direct, source: "data/full/depots.csv (busiest depot); src/fleet_routing/cli.py:121-125; config peak window", key: "depot with most vehicles = 3; first peak dispatch = 2025-12-08 + 1 day", formula: "-",
+     check: {expr: "int(R('data/full/depots.csv').sort_values('vehicles').iloc[-1]['depot']) == 3 and J('demo:assets/dispatch_sheet.json')['dispatch_day'] == '2025-12-09'", fmt: bool}}
+  - {id: F-23, slides: ["06"], label: "Sweep trucks on the map day", shown: "104 trucks", type: direct, source: "outputs/full/route_map.png (left panel title)", key: "plot title", formula: "-", manual: "Read from the PNG title; the repo does not save per-depot-day routes. Cross-check: depot 3 fleet = 104 (depots.csv)."}
+  - {id: F-24, slides: ["06"], label: "Sweep road km on the map day", shown: "11,368 km", type: direct, source: "outputs/full/route_map.png (left panel title)", key: "plot title", formula: "-", manual: "Read from the PNG title; not persisted in any CSV."}
+  - {id: F-25, slides: ["06"], label: "OR-Tools (risk-priced) trucks on the map day", shown: "93 trucks", type: direct, source: "outputs/full/route_map.png (right panel title); re-run in demo assets/dispatch_sheet.json", key: "trucks_used", formula: "-",
+     check: {expr: "J('demo:assets/dispatch_sheet.json')['trucks_used']", fmt: "{:d}", expect: "93"}}
+  - {id: F-26, slides: ["06"], label: "OR-Tools (risk-priced) road km on the map day", shown: "8,574 km", type: direct, source: "outputs/full/route_map.png (right panel title)", key: "plot title", formula: "-", manual: "Read from the PNG title. The single-day re-run (assets/dispatch_sheet.json) gives 8,412.7 km because the solver stops on wall-clock time (A-04)."}
+  - {id: F-27, slides: ["06"], label: "Map-day km change", shown: "-24.6% km", type: derived, source: "F-24, F-26 (plot titles)", key: "8,574 vs 11,368", formula: "(8,574 - 11,368) / 11,368 x 100 = -24.58%",
+     check: {expr: "(8574 / 11368 - 1) * 100", fmt: "{:+.1f}%", expect: "-24.6%"}, note: "Arithmetic is checked; the two inputs are manual (F-24, F-26)."}
+  - {id: F-28, slides: ["06"], label: "Peak-week orders", shown: "13,554 orders", type: direct, source: "outputs/full/routing_summary.csv", key: "arm=sweep, window=peak, orders", formula: "-",
+     check: {expr: "int(row('outputs/full/routing_summary.csv', arm='sweep', window='peak')['orders'])", fmt: "{:,d}", expect: "13,554"}}
+  - {id: F-29, slides: ["06", "08"], label: "Sweep road km, peak week", shown: "140,683 km", type: direct, source: "outputs/full/routing_summary.csv", key: "arm=sweep, window=peak, total_km", formula: "-",
+     check: {expr: "row('outputs/full/routing_summary.csv', arm='sweep', window='peak')['total_km']", fmt: "{:,.0f}", expect: "140,683"}}
+  - {id: F-30, slides: ["06", "08"], label: "OR-Tools road km, peak week", shown: "109,607 km", type: direct, source: "outputs/full/routing_summary.csv", key: "arm=ortools, window=peak, total_km", formula: "-",
+     check: {expr: "row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['total_km']", fmt: "{:,.0f}", expect: "109,607"}}
+  - {id: F-31, slides: ["06", "08"], label: "Road km change, peak week", shown: "-22.1%", type: derived, source: "outputs/full/routing_summary.csv", key: "F-30 vs F-29", formula: "(109,607.3 - 140,683.4) / 140,683.4 x 100 = -22.09%",
+     check: {expr: "(row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['total_km'] / row('outputs/full/routing_summary.csv', arm='sweep', window='peak')['total_km'] - 1) * 100", fmt: "{:+.1f}%", expect: "-22.1%"}}
+  # ---- slide 07
+  - {id: F-32, slides: ["07"], label: "Trucks on the dispatch sheet", shown: "93 trucks", type: direct, source: "demo assets/dispatch_sheet.json (re-run of the repo's routing for Depot 3, 2025-12-09)", key: "trucks_used (rostered 104)", formula: "-",
+     check: {expr: "J('demo:assets/dispatch_sheet.json')['trucks_used']", fmt: "{:d}", expect: "93"}}
+  - {id: F-33, slides: ["07"], label: "Orders on the sheet", shown: "910 orders", type: direct, source: "demo assets/dispatch_sheet.json; data/full/dispatch_orders.csv", key: "orders on 2025-12-08 for depot 3", formula: "-",
+     check: {expr: "J('demo:assets/dispatch_sheet.json')['orders'] == len(R('data/full/dispatch_orders.csv').query(\"date == '2025-12-08' and depot == 3\")) == 910", fmt: bool}}
+  - {id: F-34, slides: ["07"], label: "Orders inside their delivery windows", shown: "all inside their delivery windows", type: direct, source: "demo assets/dispatch_sheet.json", key: "on_time = delivered = orders", formula: "910 / 910",
+     check: {expr: "(lambda d: d['on_time'] == d['delivered'] == d['orders'])(J('demo:assets/dispatch_sheet.json'))", fmt: bool}}
+  - {id: F-35, slides: ["07"], label: "Total km on the sheet", shown: "8,413 km", type: direct, source: "demo assets/dispatch_sheet.json", key: "total_km = 8,412.7", formula: "rounded",
+     check: {expr: "J('demo:assets/dispatch_sheet.json')['total_km']", fmt: "{:,.0f}", expect: "8,413"}}
+  - {id: F-36, slides: ["07"], label: "Six sheet rows (truck, stops, first shipment id, ETAs, km, return)", shown: "T-013, T-025, T-031, T-035, T-039, T-054", type: direct, source: "demo assets/dispatch_sheet.json, injected into compositions/value.html", key: "vehicles 12, 24, 30, 34, 38, 53", formula: "truck id = vehicle index + 1; depart = SHIFT_START",
+     check: {expr: "sheet_rows_match()", fmt: bool}}
+  - {id: F-37, slides: ["07"], label: "Trucks not shown on the sheet", shown: "+ 87 more trucks", type: derived, source: "F-32", key: "93 - 6 rows", formula: "93 - 6 = 87",
+     check: {expr: "J('demo:assets/dispatch_sheet.json')['trucks_used'] - 6", fmt: "{:d}", expect: "87"}}
+  # ---- slide 08
+  - {id: F-38, slides: ["08"], label: "Truck-days change, peak week", shown: "-8.1%", type: derived, source: "outputs/full/routing_summary.csv", key: "vehicle_days: ortools 1,339 vs sweep 1,457", formula: "(1,339 - 1,457) / 1,457 x 100 = -8.10%",
+     check: {expr: "(row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['vehicle_days'] / row('outputs/full/routing_summary.csv', arm='sweep', window='peak')['vehicle_days'] - 1) * 100", fmt: "{:+.1f}%", expect: "-8.1%"}}
+  - {id: F-39, slides: ["08"], label: "Sweep truck-days, peak week", shown: "1,457", type: direct, source: "outputs/full/routing_summary.csv", key: "arm=sweep, window=peak, vehicle_days", formula: "-",
+     check: {expr: "int(row('outputs/full/routing_summary.csv', arm='sweep', window='peak')['vehicle_days'])", fmt: "{:,d}", expect: "1,457"}}
+  - {id: F-40, slides: ["08"], label: "OR-Tools truck-days, peak week", shown: "1,339", type: direct, source: "outputs/full/routing_summary.csv", key: "arm=ortools, window=peak, vehicle_days", formula: "-",
+     check: {expr: "int(row('outputs/full/routing_summary.csv', arm='ortools', window='peak')['vehicle_days'])", fmt: "{:,d}", expect: "1,339"}}
+  - {id: F-41, slides: ["08"], label: "Zone-demand WAPE, XGBoost (all days)", shown: "0.208", type: direct, source: "outputs/full/forecast_scores.csv", key: "model=xgboost, period=all, wape", formula: "-",
+     check: {expr: "row('outputs/full/forecast_scores.csv', model='xgboost', period='all')['wape']", fmt: "{:.3f}", expect: "0.208"}}
+  - {id: F-42, slides: ["08"], label: "Zone-demand WAPE, ETS", shown: "ETS 0.260", type: direct, source: "outputs/full/forecast_scores.csv", key: "model=ets, period=all, wape", formula: "-",
+     check: {expr: "row('outputs/full/forecast_scores.csv', model='ets', period='all')['wape']", fmt: "{:.3f}", expect: "0.260"}}
+  - {id: F-43, slides: ["08"], label: "Zone-demand WAPE, seasonal naive", shown: "naive 0.344", type: direct, source: "outputs/full/forecast_scores.csv", key: "model=seasonal_naive, period=all, wape", formula: "-",
+     check: {expr: "row('outputs/full/forecast_scores.csv', model='seasonal_naive', period='all')['wape']", fmt: "{:.3f}", expect: "0.344"}}
+  - {id: F-44, slides: ["08"], label: "Peak depot-days short of trucks, XGBoost roster", shown: "8.7%", type: direct, source: "outputs/full/roster_scores.csv", key: "model=xgboost, period=peak, short_depot_days_pct", formula: "-",
+     check: {expr: "row('outputs/full/roster_scores.csv', model='xgboost', period='peak')['short_depot_days_pct']", fmt: "{:.1f}%", expect: "8.7%"}}
+  - {id: F-45, slides: ["08"], label: "Peak depot-days short of trucks, ETS roster", shown: "ETS forecast: 53.8%", type: direct, source: "outputs/full/roster_scores.csv", key: "model=ets, period=peak, short_depot_days_pct", formula: "-",
+     check: {expr: "row('outputs/full/roster_scores.csv', model='ets', period='peak')['short_depot_days_pct']", fmt: "{:.1f}%", expect: "53.8%"}}
+  # ---- slide 09
+  - {id: F-46, slides: ["09"], label: "Peak misroute cut, supervisor rule", shown: "16.6%", type: direct, source: "outputs/full/address_checks.csv", key: "ranked_by=rule, window=peak, reduction_pct", formula: "-",
+     check: {expr: "row('outputs/full/address_checks.csv', ranked_by='rule', window='peak')['reduction_pct']", fmt: "{:.1f}%", expect: "16.6%"}}
+  - {id: F-47, slides: ["09"], label: "Peak misroute cut, XGBoost ranking", shown: "16.4%", type: direct, source: "outputs/full/address_checks.csv", key: "ranked_by=xgboost, window=peak, reduction_pct", formula: "-",
+     check: {expr: "row('outputs/full/address_checks.csv', ranked_by='xgboost', window='peak')['reduction_pct']", fmt: "{:.1f}%", expect: "16.4%"}}
+  - {id: F-48, slides: ["09"], label: "Peak misroute cut, logistic regression", shown: "15.8%", type: direct, source: "outputs/full/address_checks.csv", key: "ranked_by=logistic, window=peak, reduction_pct", formula: "-",
+     check: {expr: "row('outputs/full/address_checks.csv', ranked_by='logistic', window='peak')['reduction_pct']", fmt: "{:.1f}%", expect: "15.8%"}}
+  - {id: F-49, slides: ["09"], label: "Peak misroute cut, random 5%", shown: "1.1%", type: direct, source: "outputs/full/address_checks.csv", key: "ranked_by=random, window=peak, reduction_pct", formula: "-",
+     check: {expr: "row('outputs/full/address_checks.csv', ranked_by='random', window='peak')['reduction_pct']", fmt: "{:.1f}%", expect: "1.1%"}}
+  - {id: F-50, slides: ["09"], label: "ROC-AUC, XGBoost (held-out, all)", shown: "ROC-AUC 0.645", type: direct, source: "outputs/full/risk_scores.csv", key: "model=xgboost, period=all, roc_auc", formula: "-",
+     check: {expr: "row('outputs/full/risk_scores.csv', model='xgboost', period='all')['roc_auc']", fmt: "{:.3f}", expect: "0.645"}}
+  - {id: F-51, slides: ["09"], label: "ROC-AUC, logistic regression", shown: "ROC-AUC 0.647", type: direct, source: "outputs/full/risk_scores.csv", key: "model=logistic, period=all, roc_auc", formula: "-",
+     check: {expr: "row('outputs/full/risk_scores.csv', model='logistic', period='all')['roc_auc']", fmt: "{:.3f}", expect: "0.647"}}
+  - {id: F-52, slides: ["09"], label: "ROC-AUC ceiling (true pre-dispatch risk)", shown: "ceiling AUC 0.647", type: direct, source: "outputs/full/risk_scores.csv", key: "model=ceiling, period=all, roc_auc", formula: "-",
+     check: {expr: "row('outputs/full/risk_scores.csv', model='ceiling', period='all')['roc_auc']", fmt: "{:.3f}", expect: "0.647"}}
+  # ---- slide 10
+  - {id: F-53, slides: ["10"], label: "Licence", shown: "MIT", type: direct, source: "LICENSE line 1", key: "-", formula: "-",
+     check: {expr: "T('LICENSE').startswith('MIT License')", fmt: bool}}
+  - {id: F-54, slides: ["10"], label: "Full run time", shown: "~18 min", type: derived, source: "outputs/full/results.json", key: "runtime_seconds = 1063", formula: "1063 / 60 = 17.7 min",
+     check: {expr: "round(J('outputs/full/results.json')['runtime_seconds'] / 60)", fmt: "~{:d} min", expect: "~18 min"}}
+  - {id: F-55, slides: ["10"], label: "Stack chips are real dependencies", shown: "OR-Tools · XGBoost · statsmodels · Python", type: direct, source: "pyproject.toml dependencies", key: "ortools, xgboost, statsmodels", formula: "-",
+     check: {expr: "all(grep('pyproject.toml', p) for p in [r'\"ortools', r'\"xgboost', r'\"statsmodels', r'requires-python'])", fmt: bool}}
+  - {id: F-56, slides: ["10"], label: "Run command", shown: "$ make run", type: direct, source: "Makefile", key: "run target", formula: "-",
+     check: {expr: "grep('Makefile', r'^run:')", fmt: bool}}
+
+slides:
+  - id: "01"
+    title: "The industry"
+    image: slides/slide-01.jpg
+    time: "0.0-7.2 s"
+    composition: "compositions/s01-context.html"
+    text:
+      - "01 · THE INDUSTRY"
+      - "Each evening, tomorrow's orders have to become routes."
+      - "WHO LIVES WITH THIS · Regional freight & 3PL carriers · Parcel & retail distribution · Grocery & e-commerce fleets"
+      - "01 Thousands of stops, routed by hand or a simple heuristic — Every evening, against a deadline"
+      - "02 Delivery windows and truck capacity collide — A tighter route can break a customer's slot"
+      - "03 Misrouted and failed deliveries — Each one costs a second trip and a customer"
+      - "04 Peak weeks outgrow the fleet — Drivers are booked days ahead, from a forecast"
+      - "THIS PROJECT tackles all four, end to end · forecast → book → route → measure"
+    assumptions: [A-16]
+    illustrative: ["The whole slide is context; no repo figures."]
+    change: "Edit the chips (#ctx-c1..3) and cards (#ctx-k1..4) in compositions/s01-context.html."
+  - id: "02"
+    title: "This project"
+    image: slides/slide-02.jpg
+    time: "6.8-11.6 s"
+    composition: "compositions/s02-hook.html"
+    text:
+      - "02 · THIS PROJECT"
+      - "300 trucks, 4 depots. Up to 2,800 orders a day. One evening to route them."
+      - "every stop has a delivery window · trailer capacity + shift limits · >5% of peak shipments misrouted"
+    assumptions: [A-01, A-06, A-11]
+    illustrative: ["Depot rings in the background are decoration."]
+    change: "Headline spans #hook-l1..l3 and chips #hook-f1..f3 in compositions/s02-hook.html; fleet/depots come from config.py FULL profile."
+  - id: "03"
+    title: "How it works (white chapter, slide A)"
+    image: slides/slide-03.jpg
+    time: "11.3-19.3 s"
+    composition: "compositions/explainer.html (CONFIG.blocks, CONFIG.groups, CONFIG.loop)"
+    text:
+      - "03 · HOW IT WORKS"
+      - "From orders to routes"
+      - "ORDERS stops + time windows → [EVERY MONDAY: FORECAST how busy is next week? → BOOK DRIVERS trucks per depot] → [EVERY EVENING: RISK CHECK which stops may go wrong? → OPTIMIZER OR-Tools, 6 s per depot] → ROUTES OUT ✓ windows kept ✓ fewer km ✓ fewer trucks"
+      - "build, score, improve (loop over the optimizer)"
+    assumptions: [A-04, A-07, A-13]
+    illustrative: ["Icons and colours are a visual language, not data.", "'every evening' = each order day is dispatched the next day (A-12)."]
+    change: "Edit CONFIG in compositions/explainer.html; badge truth comes from routing_summary.csv (F-11)."
+  - id: "04"
+    title: "The key idea (white chapter, slide B)"
+    image: slides/slide-04.jpg
+    time: "19.3-26.3 s"
+    composition: "compositions/explainer.html (#ex-b ...)"
+    text:
+      - "04 · THE KEY IDEA"
+      - "Pricing risk into the route"
+      - "Every stop gets a misroute risk — predicted from past shipments, before dispatch"
+      - "Later stops are riskier — they sit deeper in the trailer"
+      - "The optimizer charges extra km for a risky stop placed late — so it moves that stop forward"
+      - "ONE TRUCK · DELIVERY ORDER: DEPOT, !, A, B, C (1st..4th). Risk priced in: the risky stop goes first, at the cost of a small detour."
+      - "Replay: −4.2% misroutes for +4.0% km. A weak lever; the position effect is an assumption to test on real routes."
+    assumptions: [A-02, A-03, A-15]
+    illustrative: ["The A/B/C/! demo is schematic; it mirrors tests/test_risk_pricing_moves_a_risky_stop_to_the_front, not a real route."]
+    change: "Markup under #ex-b in compositions/explainer.html; the footnote figures are F-14 and F-15."
+  - id: "05"
+    title: "Architecture"
+    image: slides/slide-05.jpg
+    time: "26.0-38.8 s"
+    composition: "compositions/s03-architecture.html"
+    text:
+      - "05 · ARCHITECTURE"
+      - "Three models feed one dispatcher. One replay scores everything."
+      - "data.py · seeded generator: Zone demand (2 yrs × 40 zones), Shipments (200k history), Orders (24k · time windows)"
+      - "forecast.py Demand forecast (XGBoost vs ETS · SARIMA) → simulate.py Driver roster (trucks per depot-day)"
+      - "risk.py Misroute-risk model (XGBoost · p(misroute)) · +0.094 log-odds / stop"
+      - "routing.py OR-Tools CVRPTW (capacity · windows · shift · + misroute risk priced in km · solve budget 6.0 s) → Routes (per depot-day) → replay() Replay (km · on-time · misroutes)"
+      - "undelivered → rollover, age +1 · risk.py Address check (call top 5% before loading)"
+      - "Legend: data · models · optimizer · evaluation · risk lever"
+    assumptions: [A-01, A-02, A-04, A-09, A-12]
+    illustrative: ["Packets moving along the wires are decoration; the solve-budget bar fills in real seconds."]
+    change: "Node boxes (#n-*) and the wires array in compositions/s03-architecture.html."
+  - id: "06"
+    title: "The system running"
+    image: slides/slide-06a.jpg
+    image2: slides/slide-06b.jpg
+    time: "38.4-53.0 s"
+    composition: "compositions/s04-routes.html; assets/map-sweep.png, assets/map-ortools.png (from outputs/full/route_map.png via tools/darkmap.py)"
+    text:
+      - "06 · THE SYSTEM RUNNING"
+      - "Same depot, same peak day, two dispatchers."
+      - "Depot 3 · dispatch 2025-12-09 · ○ high predicted misroute risk"
+      - "Sweep + nearest neighbour: 104 trucks · 11,368 km | OR-Tools CVRPTW, risk-priced: 93 trucks · 8,574 km | −24.6% km"
+      - "PEAK WEEK · ALL 4 DEPOTS · 13,554 ORDERS — 140,683 → 109,607 km, −22.1% (sweep vs OR-Tools bars)"
+    assumptions: [A-03, A-04, A-05, A-12, A-14]
+    illustrative: ["Maps are the repo's real route_map.png, colour-inverted to dark; the legend is redrawn because the original legend was removed from the image.", "The map compares sweep with risk-priced OR-Tools; the peak-week counter compares sweep with plain OR-Tools."]
+    change: "Map captions (#routes-cap-l/r, #routes-chip) and counter (#routes-wk-num, #routes-bar) in compositions/s04-routes.html; maps come from make run → outputs/full/route_map.png."
+  - id: "07"
+    title: "End-user value (white)"
+    image: slides/slide-07.jpg
+    time: "52.7-65.7 s"
+    composition: "compositions/value.html (SHEET block injected by tools/inject_sheet.py)"
+    text:
+      - "07 · END-USER VALUE"
+      - "What the dispatcher gets"
+      - "DISPATCH SHEET · DEPOT 3 · 2025-12-09 — columns TRUCK, DRIVER, OUT, STOPS, SHIPMENTS, FIRST, LAST, KM, BACK"
+      - "T-013 Driver 01 06:00 12 S013242 +11 08:00 14:00 179 15:21"
+      - "T-025 Driver 02 06:00 15 S013393 +14 08:00 15:11 198 15:54"
+      - "T-031 Driver 03 06:00 14 S012500 +13 08:00 16:39 127 17:57"
+      - "T-035 Driver 04 06:00 12 S011211 +11 08:00 16:45 152 17:58"
+      - "T-039 Driver 05 06:00 12 S010859 +11 08:00 14:48 115 15:36"
+      - "T-054 Driver 06 06:00 13 S011185 +12 08:00 16:44 111 17:37"
+      - "+ 87 more trucks on this sheet · ✓ 93 trucks · 910 orders, all inside their delivery windows · 8,413 km"
+      - "DEPOT · LOADING DOCK · TODAY'S ROUTES"
+      - "Every truck leaves with a loaded, ordered stop list and arrival times. No evening of routing by hand."
+    assumptions: [A-03, A-04, A-05, A-06, A-10, A-11]
+    illustrative: ["Driver 01-06 are placeholders (no real people).", "Dispatcher figure, loading dock, truck drawings, 3 boxes per truck (stands in for 12-15 shipments) and driving speed are illustrative.", "The 4 animated trucks (T-025, T-031, T-035, T-054) were chosen because their routes spread in different directions; their stop positions and order are real, scaled to fit the panel.", "'No evening of routing by hand' is framing from the README problem statement, not a measured result."]
+    change: "Re-run tools/export_dispatch_sheet.py, then tools/inject_sheet.py (--rows / --animate pick the trucks); layout in compositions/value.html."
+  - id: "08"
+    title: "Results"
+    image: slides/slide-08.jpg
+    time: "65.4-74.2 s"
+    composition: "compositions/s05-results.html (stats array)"
+    text:
+      - "08 · RESULTS · TWO REPLAYED WEEKS"
+      - "Fewer km, fewer trucks, enough drivers booked."
+      - "OPTIMIZER −22.1% road km, peak week · 140,683 → 109,607"
+      - "OPTIMIZER −8.1% truck-days, peak week · 1,457 → 1,339"
+      - "FORECAST 0.208 zone-demand WAPE, XGBoost · ETS 0.260 · naive 0.344"
+      - "FORECAST 8.7% peak depot-days short of trucks · ETS forecast: 53.8%"
+      - "4 depots · 300 trucks · 40 zones · every number from one replay function"
+    assumptions: [A-04, A-05, A-10, A-12, A-13, A-15]
+    illustrative: ["Mini bars under each number are drawn to the same ratio (after / before)."]
+    change: "The stats array and card text in compositions/s05-results.html."
+  - id: "09"
+    title: "What didn't win"
+    image: slides/slide-09.jpg
+    time: "73.8-80.0 s"
+    composition: "compositions/s06-twist.html"
+    text:
+      - "09 · WHAT DIDN'T WIN"
+      - "The XGBoost risk model ties a two-line supervisor rule."
+      - "Peak misroutes cut by calling the top 5% of consignees before loading"
+      - "Supervisor rule (postcode, then address) 16.6% · XGBoost (ROC-AUC 0.645) 16.4% · Logistic regression (ROC-AUC 0.647) 15.8% · Random 5% 1.1%"
+      - "Why: the label caps both models (ceiling AUC 0.647). Next step: train on fixable faults only."
+    assumptions: [A-02, A-08, A-09, A-15]
+    illustrative: ["Bar lengths: 1,000 px track = 20% reduction."]
+    change: "Rows #twist-r1..r4 (bar widths are inline styles) in compositions/s06-twist.html."
+  - id: "10"
+    title: "End card"
+    image: slides/slide-10.jpg
+    time: "79.6-84.0 s"
+    composition: "compositions/s07-end.html"
+    text:
+      - "10 · OPEN SOURCE · MIT · RUNS ON A LAPTOP"
+      - "fleet-routing-cvrp"
+      - "github.com/kavya2693/fleet-routing-cvrp"
+      - "OR-Tools · XGBoost · statsmodels · Python"
+      - "$ make run   # 300 trucks, 4 depots, ~18 min"
+    assumptions: [A-15]
+    illustrative: ["Faded route map in the background is the OR-Tools panel of route_map.png."]
+    change: "Text in compositions/s07-end.html."
+
+caveats:
+  - "Map-day km: the slide shows 8,574 km (route_map.png title, from make run). The single-day re-run used for slide 07 gives 8,412.7 km. OR-Tools stops on wall-clock time, so repeated runs differ slightly (README 'Known limitations': 87,715 vs 88,698 km on the quiet week)."
+  - "−24.6% (slide 06) is derived from the two plot titles; the repo does not store per-depot-day routes for make run."
+  - "The map (slide 06) compares sweep with risk-priced OR-Tools; the peak-week counter (slides 06, 08) compares sweep with plain OR-Tools."
+  - "'Up to 2,800 orders a day' (slide 02) is the busiest day in the data (2,785 orders, rounded up); the README's 'closer to 2,700' describes a typical peak day."
+  - "On-time 100% / 'windows kept' is true by construction: OR-Tools treats windows as hard and rolls stops over instead (A-07)."
+  - "Slide 01 statements are general industry knowledge (A-16)."
+  - "Route-position misroute risk is a mechanism written into the generator (A-02); its real size must be measured on real route histories before the routing-side misroute numbers mean anything (README 'Known limitations')."
+  - "Driver names on slide 07 are placeholders."
+
+stills:
+  master: renders/fleet-routing-cvrp-master.mp4   # relative to demo_dir
+  width: 1600
+  times: {"01": 6.4, "02": 11.1, "03": 18.9, "04": 25.5, "05": 37.2, "06a": 44.5, "06b": 52.0, "07": 64.6, "08": 73.6, "09": 79.4, "10": 83.8}
+
+# Extra check helpers (Python), available to check expressions.
+helpers: |
+  import re as _re
+  def sheet_rows_match():
+      """The SHEET block injected in value.html must equal the exported dispatch sheet."""
+      html = T('demo:compositions/value.html')
+      m = _re.search(r"const SHEET = (\{.*?\}); /\* SHEET:END", html, _re.S)
+      sheet = json.loads(m.group(1))
+      src = {t['vehicle']: t for t in J('demo:assets/dispatch_sheet.json')['trucks']}
+      for r in sheet['rows']:
+          t = src[r['vehicle']]
+          for k in ('stops', 'km', 'return', 'first_eta', 'last_eta', 'depart'):
+              if r[k] != t[k]:
+                  return False
+          if r['ids'] != [s['order_id'] for s in t['sequence']]:
+              return False
+      return [r['vehicle'] for r in sheet['rows']] == [12, 24, 30, 34, 38, 53]

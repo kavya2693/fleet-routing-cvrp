@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /* WHITE "END-USER VALUE" SLIDE: the artifact the user plans with (left) + a small 2D scene of the
+           person using it (right). Data is inlined by tools/inject_sheet.py between the SHEET markers. */
+        #value-root {
+          position: absolute; inset: 0;
+          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #6b7280; --w-line: #d1d5db; --w-faint: #f3f4f6;
+          --w-data: #d97706; --w-model: #6d3cf0; --w-tools: #1f8fa8; --w-risk: #dc2b4a; --w-opt: #0f9f6e;
+          color: var(--w-ink); font-family: Inter, "Helvetica Neue", sans-serif;
+        }
+        #value-root .page { position: absolute; inset: 0; background: var(--w-bg); }
+        #value-root .edge { position: absolute; top: 0; width: 10px; height: 1080px; background: var(--w-model); }
+        #value-root .kick {
+          position: absolute; left: 120px; top: 84px; font-family: "JetBrains Mono", monospace; font-size: 24px;
+          font-weight: 700; letter-spacing: 0.18em; color: var(--w-mute);
+        }
+        #value-root .ttl {
+          position: absolute; left: 120px; top: 124px; font-family: Montserrat, sans-serif; font-weight: 900;
+          font-size: 68px; letter-spacing: -0.02em; white-space: nowrap;
+        }
+        #value-root .ttl em { font-style: normal; color: var(--w-model); }
+        #value-root .uline { position: absolute; left: 124px; top: 222px; width: 120px; height: 10px; border-radius: 5px; background: var(--w-model); transform-origin: left center; }
+
+        /* sheet */
+        #value-root .sheet {
+          position: absolute; left: 120px; top: 280px; width: 1050px; height: 640px; border: 3px solid var(--w-line);
+          border-radius: 24px; background: #fff; box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08); overflow: hidden;
+        }
+        #value-root .sheet-head {
+          height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+          background: var(--w-ink); color: #fff; font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 700; letter-spacing: 0.08em;
+        }
+        #value-root .sheet-head span:last-child { color: #c4b5fd; }
+        #value-root .row {
+          position: relative; display: flex; align-items: center; height: 64px; padding: 0 26px;
+          font-family: "JetBrains Mono", monospace; font-size: 21px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
+        }
+        #value-root .row.hdr { height: 54px; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: var(--w-mute); background: #fafafa; }
+        #value-root .row .tint { position: absolute; inset: 0; opacity: 0; }
+        #value-root .c { position: relative; white-space: nowrap; }
+        #value-root .c1 { width: 128px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        #value-root .c1 i { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--w-line); }
+        #value-root .c2 { width: 138px; font-family: Inter, sans-serif; font-size: 22px; }
+        #value-root .c3 { width: 82px; }
+        #value-root .c4 { width: 74px; text-align: right; padding-right: 18px; }
+        #value-root .c5 { width: 196px; color: var(--w-soft); }
+        #value-root .c6, #value-root .c7 { width: 92px; }
+        #value-root .c8 { width: 84px; text-align: right; padding-right: 14px; }
+        #value-root .c9 { width: 80px; }
+        #value-root .more { padding: 14px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 20px; color: var(--w-mute); }
+        #value-root .totals {
+          position: absolute; left: 0; bottom: 0; width: 100%; height: 66px; display: flex; align-items: center; gap: 14px; padding: 0 30px;
+          background: #ecfdf5; border-top: 2px solid #a7f3d0; font-size: 23px; font-weight: 700; color: #065f46;
+        }
+        #value-root .totals b { display: block; width: 28px; height: 28px; border-radius: 50%; background: var(--w-opt); position: relative; }
+        #value-root .totals svg { position: absolute; left: 6px; top: 6px; width: 16px; height: 16px; }
+
+        /* scene */
+        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); }
+        #value-root .dock { position: absolute; left: 1220px; top: 312px; width: 600px; height: 128px; border-radius: 20px; background: var(--w-faint); }
+        #value-root .map {
+          position: absolute; left: 1220px; top: 462px; width: 600px; height: 458px; border-radius: 24px; border: 3px solid var(--w-line);
+          background-color: #fbfbfc;
+          background-image: linear-gradient(#eef0f3 2px, transparent 2px), linear-gradient(90deg, #eef0f3 2px, transparent 2px);
+          background-size: 48px 48px; overflow: hidden;
+        }
+        #value-root svg.layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #value-root .caption {
+          position: absolute; left: 120px; top: 944px; width: 1700px; font-size: 30px; font-weight: 700; color: var(--w-ink);
+        }
+        #value-root .caption span { color: var(--w-model); }
+      </style>
+
+      <div id="value-root" data-composition-id="value" data-width="1920" data-height="1080">
+        <div class="page" id="va-page">
+          <div class="kick" id="va-kick">07 · END-USER VALUE</div>
+          <div class="ttl" id="va-ttl">What the <em>dispatcher</em> gets</div>
+          <div class="uline" id="va-ul"></div>
+
+          <div class="sheet" id="va-sheet">
+            <div class="sheet-head"><span id="va-head-l">DISPATCH SHEET</span><span id="va-head-r"></span></div>
+            <div class="row hdr" id="va-hdr">
+              <div class="c c1">TRUCK</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 18px">DRIVER</div>
+              <div class="c c3">OUT</div><div class="c c4">STOPS</div><div class="c c5">SHIPMENTS</div>
+              <div class="c c6">FIRST</div><div class="c c7">LAST</div><div class="c c8">KM</div><div class="c c9">BACK</div>
+            </div>
+            <div id="va-rows"></div>
+            <div class="more" id="va-more"></div>
+            <div class="totals" id="va-totals"></div>
+          </div>
+
+          <div class="scene-lab" id="va-lab-dock" style="left: 1220px; top: 280px">DEPOT · LOADING DOCK</div>
+          <div class="dock" id="va-dock"></div>
+          <div class="map" id="va-map"></div>
+          <div class="scene-lab" id="va-lab-map" style="left: 1244px; top: 476px">TODAY'S ROUTES</div>
+          <svg class="layer" id="va-svg" viewBox="0 0 1920 1080"></svg>
+
+          <div class="caption" id="va-caption">Every truck leaves with a loaded, ordered stop list and arrival times. <span>No evening of routing by hand.</span></div>
+        </div>
+        <div class="edge" id="va-edge"></div>
+      </div>
+
+      <script>
+        (() => {
+          /* SHEET:BEGIN */ const SHEET = {"depot":3,"depot_xy":[180.0,130.0],"dispatch_day":"2025-12-09","trucks_used":93,"orders":910,"delivered":910,"on_time":910,"total_km":8412.7,"rows":[{"vehicle":12,"depart":"06:00","stops":12,"km":179.1,"return":"15:21","first_eta":"08:00","last_eta":"14:00","load":26,"capacity":26,"ids":["S013242","S013171","S013209","S013201","S013252","S013295","S013164","S013249","S013243","S013228","S013290","S013224"],"animate":-1},{"vehicle":24,"depart":"06:00","stops":15,"km":198.4,"return":"15:54","first_eta":"08:00","last_eta":"15:11","load":26,"capacity":26,"ids":["S013393","S013404","S013387","S013369","S013382","S013364","S013342","S013385","S013365","S011236","S011263","S011237","S011241","S011064","S011767"],"animate":0},{"vehicle":30,"depart":"06:00","stops":14,"km":126.6,"return":"17:57","first_eta":"08:00","last_eta":"16:39","load":25,"capacity":26,"ids":["S012500","S012462","S012498","S012213","S012225","S012249","S012224","S012214","S012244","S012208","S012238","S012245","S012227","S012247"],"animate":1},{"vehicle":34,"depart":"06:00","stops":12,"km":151.8,"return":"17:58","first_eta":"08:00","last_eta":"16:45","load":25,"capacity":26,"ids":["S011211","S013283","S013204","S013232","S013241","S013227","S013230","S013158","S013247","S013226","S013253","S013166"],"animate":2},{"vehicle":38,"depart":"06:00","stops":12,"km":114.9,"return":"15:36","first_eta":"08:00","last_eta":"14:48","load":26,"capacity":26,"ids":["S010859","S012203","S012210","S012240","S012251","S012209","S012233","S012243","S012204","S012221","S012230","S012460"],"animate":-1},{"vehicle":53,"depart":"06:00","stops":13,"km":110.6,"return":"17:37","first_eta":"08:00","last_eta":"16:44","load":24,"capacity":26,"ids":["S011185","S012910","S012913","S012924","S012882","S012904","S012887","S012889","S012876","S012884","S013092","S012922","S012926"],"animate":3}],"routes":[[[148.16519544757043,112.45232380158058,"08:00"],[146.32519972536795,111.73046661136614,"08:20"],[145.66276046189066,104.42536008380117,"08:52"],[146.91869210253878,103.34605644830503,"09:11"],[149.03421115546232,104.6615516775706,"09:39"],[148.58603740457457,104.05016829424676,"09:57"],[149.096493092895,97.89344018640206,"10:23"],[157.0733341267671,95.61556288652672,"10:56"],[138.4666101033322,101.37805886553448,"11:47"],[130.4457288724109,107.92735360378828,"12:20"],[136.7375317334559,113.4784870069862,"12:58"],[141.06805346173647,117.91006627803915,"13:28"],[143.0890685659622,118.3158202031048,"13:52"],[156.7900232513874,117.56730818910049,"14:34"],[169.67369334304797,120.22154065613456,"15:11"]],[[165.59451184638058,141.28124669292797,"08:00"],[170.99924527839076,145.23407772030208,"08:27"],[171.2676913723201,145.47834125967265,"12:00"],[172.3724152326952,162.8912533352084,"12:44"],[170.51637967258338,164.8833431922129,"13:09"],[169.4209813553181,165.73705310218446,"13:36"],[168.21131119051364,166.30918722344953,"14:11"],[168.42919633659798,166.92900681213857,"14:29"],[167.80350615527755,168.18364640696018,"14:52"],[168.810803646164,169.86903751273582,"15:12"],[169.89279041036957,169.21023858079644,"15:30"],[170.6375452326355,170.6721402573139,"15:49"],[169.9041257608551,168.71449619734915,"16:17"],[170.03554465102178,165.17920448310943,"16:39"]],[[185.1498524372526,118.011562621104,"08:00"],[215.15622819543773,118.32463420176656,"09:15"],[220.4637853529288,118.43969014747654,"09:44"],[220.6040705214816,108.2723076957604,"12:00"],[221.87649011853284,107.28063679353076,"12:23"],[220.8559113331321,106.03609340591878,"12:50"],[218.4211122830541,106.37110904980352,"13:10"],[217.4591869069524,104.76582453851674,"15:00"],[213.77809892800784,102.06191939379508,"15:24"],[212.8247534018193,102.11050552841247,"15:46"],[210.29463486745107,107.34398016932394,"16:16"],[202.19968881101136,108.0069487140301,"16:45"]],[[189.6277530024655,134.985795697402,"08:00"],[195.30019428784013,145.6440132668339,"08:39"],[199.6111922663957,143.68103401058738,"12:00"],[201.5149342544019,145.98934916631447,"13:00"],[204.3854883581512,148.76385659334574,"13:27"],[204.09323320933223,148.9745383919458,"13:44"],[203.2418826795539,149.1975736469141,"14:10"],[204.1527138673748,153.8331127606815,"14:34"],[204.5846299627192,153.98958397151443,"14:59"],[199.71584306144575,157.7251913826,"15:29"],[199.7585914362155,158.59762986849282,"15:51"],[191.41688187730105,155.42832402664348,"16:21"],[190.74610700754548,151.0285495835761,"16:44"]]]}; /* SHEET:END */
+
+          const CONFIG = {
+            duration: 13.0,
+            colors: ["#6d3cf0", "#d97706", "#1f8fa8", "#2563eb"], // one per animated truck
+            map: { left: 1220, top: 462, w: 600, h: 458, pad: 34 }, // fitted to the animated routes, centred on the depot
+            dockY: 376,
+            dockX: [1395, 1500, 1605, 1710],
+            person: { x: 1262, y: 376 },
+          };
+          const NS = "http://www.w3.org/2000/svg";
+          const svg = document.getElementById("va-svg");
+          const el = (tag, attrs, parent) => {
+            const n = document.createElementNS(NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+            (parent || svg).appendChild(n);
+            return n;
+          };
+          const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+          const fmt = (v) => Math.round(v).toLocaleString("en-US");
+          const tl = gsap.timeline({ paused: true });
+          const D = CONFIG.duration;
+
+          // ---------------- sheet ----------------
+          document.getElementById("va-head-r").textContent = "DEPOT " + SHEET.depot + " · " + SHEET.dispatch_day;
+          const rowsEl = document.getElementById("va-rows");
+          SHEET.rows.forEach((r, i) => {
+            const col = r.animate >= 0 ? CONFIG.colors[r.animate] : "#d1d5db";
+            const ids = r.ids[0] + " +" + (r.ids.length - 1);
+            rowsEl.insertAdjacentHTML("beforeend",
+              '<div class="row" id="va-r' + i + '"><div class="tint" id="va-t' + i + '" style="background:' + col + '22"></div>' +
+              '<div class="c c1"><i style="background:' + col + '"></i>T-' + String(r.vehicle + 1).padStart(3, "0") + "</div>" +
+              '<div class="c c2">Driver ' + String(i + 1).padStart(2, "0") + "</div>" +
+              '<div class="c c3">' + r.depart + '</div><div class="c c4">' + r.stops + '</div><div class="c c5">' + ids + "</div>" +
+              '<div class="c c6">' + r.first_eta + '</div><div class="c c7">' + r.last_eta + '</div><div class="c c8">' + Math.round(r.km) + "</div>" +
+              '<div class="c c9">' + r.return + "</div></div>");
+          });
+          document.getElementById("va-more").textContent = "+ " + (SHEET.trucks_used - SHEET.rows.length) + " more trucks on this sheet";
+          document.getElementById("va-totals").innerHTML =
+            "<b>" + CHECK + "</b>" + SHEET.trucks_used + " trucks · " + fmt(SHEET.orders) + " orders, all inside their delivery windows · " + fmt(SHEET.total_km) + " km";
+
+          // ---------------- scene: person, trucks, map ----------------
+          const P = CONFIG.person;
+          const person = el("g", { id: "va-person" });
+          el("circle", { cx: P.x, cy: P.y - 34, r: 16, fill: "#111827" }, person);
+          el("path", { d: "M" + (P.x - 26) + " " + (P.y + 40) + "v-26a26 22 0 0 1 52 0v26z", fill: "#6d3cf0" }, person);
+          const paper = el("g", { id: "va-paper" }, person);
+          el("rect", { x: P.x + 18, y: P.y - 10, width: 26, height: 32, rx: 4, fill: "#fff", stroke: "#111827", "stroke-width": 2.5 }, paper);
+          [0, 1, 2].forEach((k) => el("line", { x1: P.x + 23, x2: P.x + 39, y1: P.y - 2 + k * 8, y2: P.y - 2 + k * 8, stroke: "#9ca3af", "stroke-width": 2 }, paper));
+
+          const truckShape = (g, col) => {
+            el("rect", { x: -27, y: -17, width: 34, height: 24, rx: 4, fill: col }, g);
+            el("path", { d: "M8 -10h10l9 9v8H8z", fill: "#111827" }, g);
+            el("rect", { x: 12, y: -7, width: 7, height: 6, rx: 1.5, fill: "#e5e7eb" }, g);
+            el("circle", { cx: -17, cy: 9, r: 5.5, fill: "#111827" }, g);
+            el("circle", { cx: 17, cy: 9, r: 5.5, fill: "#111827" }, g);
+          };
+
+          const [dx, dy] = SHEET.depot_xy;
+          const MB = CONFIG.map, allPts = SHEET.routes.flat();
+          const ex = Math.max(...allPts.map((q) => Math.abs(q[0] - dx))), ey = Math.max(...allPts.map((q) => Math.abs(q[1] - dy)));
+          const M = { cx: MB.left + MB.w / 2, cy: MB.top + MB.h / 2 + 12,
+            pxPerKm: Math.min((MB.w / 2 - MB.pad) / ex, (MB.h / 2 - MB.pad - 12) / ey) };
+          const toScreen = (x, y) => [M.cx + (x - dx) * M.pxPerKm, M.cy - (y - dy) * M.pxPerKm];
+          // depot marker on the map
+          const depot = el("g", { id: "va-depot" });
+          el("rect", { x: M.cx - 22, y: M.cy - 22, width: 44, height: 44, rx: 10, fill: "#111827" }, depot);
+          const dt = el("text", { x: M.cx, y: M.cy + 7, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace", "font-size": 18, "font-weight": 700, fill: "#fff" }, depot);
+          dt.textContent = "D" + SHEET.depot;
+
+          const animRows = SHEET.rows.map((r, i) => ({ r, i })).filter((o) => o.r.animate >= 0);
+          const LOAD0 = 2.2, DRIVE0 = 4.6;
+          SHEET.routes.forEach((route, ti) => {
+            const col = CONFIG.colors[ti];
+            const rowIdx = animRows.find((o) => o.r.animate === ti).i;
+            const pts = route.map(([x, y]) => toScreen(x, y));
+            const all = [[M.cx, M.cy], ...pts];
+            // route line, drawn as the truck drives
+            const d = "M" + all.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L");
+            const L = all.slice(1).reduce((s, p, k) => s + Math.hypot(p[0] - all[k][0], p[1] - all[k][1]), 0);
+            const path = el("path", { d, fill: "none", stroke: col, "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-dasharray": L + " " + L, "stroke-dashoffset": L, opacity: 0.85 });
+            // stops
+            const stopEls = pts.map((p) => {
+              const g = el("g", {});
+              el("circle", { cx: p[0], cy: p[1], r: 7, fill: "#fff", stroke: col, "stroke-width": 3 }, g);
+              const ok = el("g", { opacity: 0 }, g);
+              el("circle", { cx: p[0], cy: p[1], r: 10, fill: "#0f9f6e" }, ok);
+              el("path", { d: "M" + (p[0] - 4.5) + " " + (p[1] + 0.5) + "l3 3 6-6.5", fill: "none", stroke: "#fff", "stroke-width": 2.6, "stroke-linecap": "round", "stroke-linejoin": "round" }, ok);
+              return { g, ok };
+            });
+            // truck at the dock
+            const tx = CONFIG.dockX[ti], ty = CONFIG.dockY;
+            const truck = el("g", { id: "va-truck" + ti });
+            truckShape(truck, col);
+            // three shipment boxes per truck, handed over by the dispatcher
+            const boxes = [0, 1, 2].map((b) => el("rect", { x: -7, y: -7, width: 14, height: 14, rx: 3, fill: col, opacity: 0 }));
+
+            // --- timeline for this truck
+            tl.fromTo(truck, { x: tx, y: ty + 40, opacity: 0 }, { x: tx, y: ty, opacity: 1, duration: 0.5, ease: "power3.out" }, 1.2 + ti * 0.12);
+            stopEls.forEach((s, k) => tl.fromTo(s.g, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 1.8 + ti * 0.1 + k * 0.03));
+            const lt = LOAD0 + ti * 0.5;
+            tl.to("#va-t" + rowIdx, { opacity: 1, duration: 0.25 }, lt);
+            boxes.forEach((bx, b) => {
+              tl.fromTo(bx, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.05 }, lt + b * 0.1);
+              tl.fromTo(bx, { x: P.x + 31, y: P.y + 6 }, { x: tx - 10 + b * 7, y: ty - 6, duration: 0.45, ease: "power2.inOut" }, lt + b * 0.1);
+              tl.to(bx, { attr: { opacity: 0 }, duration: 0.1 }, lt + b * 0.1 + 0.45);
+            });
+            tl.to("#va-t" + rowIdx, { opacity: 0.45, duration: 0.4 }, lt + 0.9);
+            // drive: dock -> depot -> stops in sheet order, constant speed
+            const start = DRIVE0 + ti * 0.35, LEG = 0.5, DRIVE = 4.2;
+            tl.to(truck, { x: M.cx, y: M.cy, scale: 0.72, duration: LEG, ease: "power2.inOut" }, start);
+            let t = start + LEG;
+            tl.to(path, { attr: { "stroke-dashoffset": 0 }, duration: DRIVE, ease: "none" }, t);
+            for (let k = 1; k < all.length; k++) {
+              const seg = Math.hypot(all[k][0] - all[k - 1][0], all[k][1] - all[k - 1][1]);
+              const dur = (DRIVE * seg) / L;
+              tl.to(truck, { x: all[k][0], y: all[k][1], duration: dur, ease: "none" }, t);
+              t += dur;
+              tl.fromTo(stopEls[k - 1].ok, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.15 }, t);
+            }
+          });
+
+          // stacking: route lines < depot marker < trucks
+          svg.appendChild(depot);
+          SHEET.routes.forEach((_, ti) => svg.appendChild(document.getElementById("va-truck" + ti)));
+
+          // ---------------- choreography ----------------
+          tl.fromTo("#va-page", { clipPath: "inset(0px 100% 0px 0px)" }, { clipPath: "inset(0px 0% 0px 0px)", duration: 0.7, ease: "power3.inOut" }, 0);
+          tl.fromTo("#va-edge", { x: 0, opacity: 1 }, { x: 1920, duration: 0.7, ease: "power3.inOut" }, 0);
+          tl.to("#va-edge", { opacity: 0, duration: 0.1 }, 0.7);
+          tl.fromTo("#va-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
+          tl.fromTo("#va-ttl", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.55);
+          tl.fromTo("#va-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.9);
+          tl.fromTo("#va-sheet", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.8);
+          SHEET.rows.forEach((_, i) => tl.fromTo("#va-r" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 1.3 + i * 0.3));
+          tl.fromTo("#va-more", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3 + SHEET.rows.length * 0.3);
+          tl.fromTo("#va-totals", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 3.4);
+          tl.fromTo(["#va-dock", "#va-lab-dock", "#va-map", "#va-lab-map"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.9);
+          tl.fromTo("#va-person", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.1);
+          tl.fromTo("#va-paper", { rotation: 0 }, { rotation: -10, svgOrigin: CONFIG.person.x + 31 + " " + (CONFIG.person.y + 6), duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 7 }, 2.1);
+          tl.fromTo("#va-depot", { opacity: 0, scale: 0.8, svgOrigin: CONFIG.map.cx + " " + CONFIG.map.cy }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 1.5);
+          tl.fromTo("#va-caption", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 9.6);
+          // wipe out (white -> dark), revealing the next dark scene underneath
+          tl.to("#va-page", { clipPath: "inset(0px 0px 0px 100%)", duration: 0.7, ease: "power3.inOut" }, D - 0.7);
+          tl.fromTo("#va-edge", { x: 0, opacity: 0 }, { x: 1920, opacity: 1, duration: 0.7, ease: "power3.inOut", immediateRender: false }, D - 0.7);
+          window.__timelines["value"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

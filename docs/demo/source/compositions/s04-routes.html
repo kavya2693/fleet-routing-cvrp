@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #routes-root { position: absolute; inset: 0; }
+        #routes-root .maps { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #routes-root .frame {
+          position: absolute; top: 214px; width: 760px; height: 636px; border-radius: 14px;
+          border: 2px solid var(--line); overflow: hidden; background: #0b1722;
+        }
+        #routes-root .frame.right { border-color: rgba(63, 216, 168, 0.7); }
+        #routes-root .frame img { display: block; width: 760px; height: 636px; }
+        #routes-root .scan {
+          position: absolute; top: 214px; left: 1040px; width: 6px; height: 636px; opacity: 0;
+          background: var(--c-opt); box-shadow: 0 0 30px var(--c-opt);
+        }
+        #routes-root .vs {
+          position: absolute; left: 880px; top: 505px; width: 160px; text-align: center;
+          font-family: var(--mono); font-size: 36px; font-weight: 700; color: var(--ink-mute);
+        }
+        #routes-root .cap { position: absolute; top: 872px; width: 760px; }
+        #routes-root .cap .name { font-size: 32px; font-weight: 700; color: var(--ink); }
+        #routes-root .cap .km { margin-top: 8px; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 32px; color: var(--ink-soft); }
+        #routes-root .cap.right .km { color: var(--c-opt); font-weight: 700; }
+        #routes-root .legend {
+          position: absolute; right: 120px; top: 126px; font-family: var(--mono); font-size: 24px;
+          line-height: 1.5; color: var(--ink-soft); text-align: right;
+        }
+        #routes-root .legend .ring { color: var(--c-risk); }
+        #routes-root .chip {
+          position: absolute; left: 1584px; top: 234px; font-family: var(--mono); font-size: 28px; font-weight: 700;
+          padding: 10px 18px; border-radius: 8px; background: var(--c-opt-deep); color: #ffffff;
+        }
+        #routes-root .week {
+          position: absolute; left: 260px; top: 280px; width: 1400px; height: 520px; border-radius: 20px;
+          border: 2px solid rgba(63, 216, 168, 0.6); background: rgba(12, 22, 32, 0.97);
+          box-shadow: 0 30px 120px rgba(0, 0, 0, 0.6); padding: 54px 72px;
+        }
+        #routes-root .wk-label { font-family: var(--mono); font-size: 26px; letter-spacing: 0.1em; color: var(--c-opt); }
+        #routes-root .wk-row { display: flex; align-items: center; gap: 28px; margin-top: 26px; }
+        #routes-root .wk-num {
+          font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 150px; font-weight: 700;
+          letter-spacing: -0.04em; color: var(--ink); width: 660px;
+        }
+        #routes-root .wk-unit { font-family: var(--mono); font-size: 48px; color: var(--ink-soft); width: 110px; }
+        #routes-root .wk-badge {
+          font-family: var(--mono); font-size: 60px; font-weight: 700; color: #ffffff;
+          background: var(--c-opt-deep); padding: 6px 22px; border-radius: 12px;
+        }
+        #routes-root .bars { margin-top: 30px; }
+        #routes-root .bar-row { display: flex; align-items: center; gap: 22px; margin-top: 14px; }
+        #routes-root .bar-row .who { width: 170px; font-family: var(--mono); font-size: 24px; color: var(--ink-soft); }
+        #routes-root .bar-track { position: relative; width: 1060px; height: 24px; border-radius: 12px; background: rgba(178, 191, 204, 0.1); }
+        #routes-root .bar-fill { position: absolute; left: 0; top: 0; width: 1060px; height: 24px; border-radius: 12px; transform-origin: left center; }
+        #routes-root .bar-fill.sweep { background: var(--ink-mute); }
+        #routes-root .bar-fill.opt { background: var(--c-opt); }
+      </style>
+
+      <div id="routes-root" data-composition-id="routes" data-width="1920" data-height="1080">
+        <div class="scene" id="routes-in">
+          <div class="eyebrow" data-layout-allow-overlap id="routes-eyebrow">06 · The system running</div>
+          <div class="scene-title" data-layout-allow-overlap id="routes-title">Same depot, same peak day, two dispatchers.</div>
+          <div class="legend" id="routes-legend">
+            <div>Depot 3 · dispatch 2025-12-09</div>
+            <div><span class="ring">○</span> high predicted misroute risk</div>
+          </div>
+          <div class="maps" id="routes-maps">
+            <div class="frame" id="routes-map-l" style="left: 120px">
+              <img src="assets/map-sweep.png" alt="sweep routes" id="routes-img-l" data-layout-allow-overflow />
+            </div>
+            <div class="vs" id="routes-vs" data-layout-allow-occlusion>vs</div>
+            <div class="frame right" id="routes-map-r" style="left: 1040px">
+              <img src="assets/map-ortools.png" alt="OR-Tools routes" id="routes-img-r" data-layout-allow-overflow />
+            </div>
+            <div class="scan" id="routes-scan"></div>
+            <div class="cap" id="routes-cap-l" style="left: 120px">
+              <div class="name">Sweep + nearest neighbour</div>
+              <div class="km">104 trucks · <span id="routes-km-l">11,368</span> km</div>
+            </div>
+            <div class="cap right" id="routes-cap-r" style="left: 1040px">
+              <div class="name">OR-Tools CVRPTW, risk-priced</div>
+              <div class="km">93 trucks · <span id="routes-km-r">8,574</span> km</div>
+            </div>
+            <div class="chip" id="routes-chip">−24.6% km</div>
+          </div>
+          <div class="week" id="routes-week">
+            <div class="wk-label">PEAK WEEK · ALL 4 DEPOTS · 13,554 ORDERS</div>
+            <div class="wk-row">
+              <div class="wk-num" id="routes-wk-num">140,683</div>
+              <div class="wk-unit">km</div>
+              <div class="wk-badge" id="routes-wk-badge">−22.1%</div>
+            </div>
+            <div class="bars">
+              <div class="bar-row"><div class="who">sweep</div><div class="bar-track"><div class="bar-fill sweep"></div></div></div>
+              <div class="bar-row"><div class="who" style="color: var(--c-opt)">OR-Tools</div><div class="bar-track"><div class="bar-fill opt" id="routes-bar"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const D = 14.6;
+          const fmt = (v) => Math.round(v).toLocaleString("en-US");
+          tl.fromTo("#routes-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+          tl.fromTo("#routes-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
+          tl.fromTo("#routes-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+          tl.fromTo("#routes-legend", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.6);
+          tl.fromTo("#routes-map-l", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.6);
+          tl.fromTo("#routes-cap-l", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.0);
+          tl.fromTo("#routes-vs", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.9);
+          tl.fromTo("#routes-map-r", { clipPath: "inset(0px 100% 0px 0px)" }, { clipPath: "inset(0px 0% 0px 0px)", duration: 1.6, ease: "power2.inOut" }, 2.3);
+          tl.fromTo("#routes-scan", { x: 0 }, { x: 754, duration: 1.6, ease: "power2.inOut" }, 2.3);
+          tl.to("#routes-scan", { opacity: 1, duration: 0.2 }, 2.3);
+          tl.to("#routes-scan", { opacity: 0, duration: 0.3 }, 3.95);
+          tl.fromTo("#routes-cap-r", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 3.6);
+          const kl = { v: 0 }, kr = { v: 0 };
+          const kle = document.getElementById("routes-km-l"), kre = document.getElementById("routes-km-r");
+          tl.to(kl, { v: 11368, duration: 1.2, ease: "power2.out", onUpdate: () => { kle.textContent = fmt(kl.v); } }, 1.0);
+          tl.to(kr, { v: 8574, duration: 1.2, ease: "power2.out", onUpdate: () => { kre.textContent = fmt(kr.v); } }, 3.6);
+          tl.fromTo("#routes-chip", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 5.0);
+          tl.fromTo("#routes-img-l", { scale: 1 }, { scale: 1.05, duration: 8, ease: "none" }, 0.6);
+          tl.fromTo("#routes-img-r", { scale: 1 }, { scale: 1.05, duration: 6.4, ease: "none" }, 2.3);
+          // phase 2: the whole peak week
+          const P2 = 7.4;
+          tl.to("#routes-maps", { opacity: 0.14, scale: 0.95, duration: 0.6, ease: "power2.inOut" }, P2);
+          tl.to(["#routes-title", "#routes-legend"], { opacity: 0, duration: 0.3 }, P2);
+          tl.fromTo("#routes-week", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, P2 + 0.2);
+          const wk = { v: 140683 };
+          const wke = document.getElementById("routes-wk-num");
+          tl.to(wk, { v: 109607, duration: 2.6, ease: "power2.inOut", onUpdate: () => { wke.textContent = fmt(wk.v); } }, P2 + 1.0);
+          tl.fromTo("#routes-bar", { scaleX: 1 }, { scaleX: 109607 / 140683, duration: 2.6, ease: "power2.inOut" }, P2 + 1.0);
+          tl.fromTo("#routes-wk-badge", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, P2 + 3.6);
+          tl.to("#routes-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          window.__timelines["routes"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

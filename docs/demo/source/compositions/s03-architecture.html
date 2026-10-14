@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #arch-root { position: absolute; inset: 0; }
+        #arch-root .diagram { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 620px; }
+        #arch-root svg.wires { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #arch-root .wire { fill: none; stroke-width: 4; stroke-linejoin: round; opacity: 0.75; }
+        #arch-root .node {
+          position: absolute; display: flex; flex-direction: column; justify-content: center; gap: 8px;
+          padding: 0 24px; border: 2px solid var(--line); border-radius: 14px; background: var(--panel);
+        }
+        #arch-root .node .t { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); white-space: nowrap; }
+        #arch-root .node .s { font-family: var(--mono); font-size: 22px; color: var(--ink-soft); white-space: nowrap; }
+        #arch-root .node .f {
+          position: absolute; right: 14px; top: -16px; font-family: var(--mono); font-size: 20px; padding: 2px 10px;
+          border-radius: 6px; background: var(--bg); border: 2px solid var(--line);
+        }
+        #arch-root .L-data { border-color: rgba(127, 168, 255, 0.55); }
+        #arch-root .L-data .f { color: var(--c-data); }
+        #arch-root .L-model { border-color: rgba(185, 162, 255, 0.6); }
+        #arch-root .L-model .f { color: var(--c-model); }
+        #arch-root .L-opt { border-color: rgba(63, 216, 168, 0.6); }
+        #arch-root .L-opt .f { color: var(--c-opt); }
+        #arch-root .L-eval { border-color: rgba(242, 196, 109, 0.65); }
+        #arch-root .L-eval .f { color: var(--c-eval); }
+        #arch-root .L-risk { border-color: rgba(255, 138, 115, 0.6); }
+        #arch-root .L-risk .f { color: var(--c-risk); }
+        #arch-root .hero { border: 3px solid var(--c-opt); background: #0f2629; box-shadow: 0 0 30px rgba(63, 216, 168, 0.12); }
+        #arch-root .hero .t { font-size: 36px; }
+        #arch-root .hero .f { left: 14px; right: auto; }
+        #arch-root .hero .s.accent { color: var(--c-risk); }
+        #arch-root .budget { position: relative; width: 100%; height: 10px; border-radius: 5px; background: rgba(63, 216, 168, 0.15); overflow: hidden; }
+        #arch-root .budget-fill { position: absolute; left: 0; top: 0; width: 100%; height: 10px; background: var(--c-opt); transform-origin: left center; }
+        #arch-root .budget-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 22px; color: var(--ink-soft); }
+        #arch-root .budget-row b { color: var(--c-opt); font-weight: 700; }
+        #arch-root .group-label { position: absolute; font-family: var(--mono); font-size: 22px; color: var(--ink-mute); letter-spacing: 0.04em; }
+        #arch-root .legend {
+          position: absolute; right: 120px; top: 232px; display: flex; gap: 26px;
+          font-family: var(--mono); font-size: 22px; color: var(--ink-soft);
+        }
+        #arch-root .legend span { display: flex; align-items: center; gap: 10px; }
+        #arch-root .legend i { display: block; width: 16px; height: 16px; border-radius: 4px; }
+        #arch-root .wire-label { position: absolute; font-family: var(--mono); font-size: 22px; white-space: nowrap; }
+      </style>
+
+      <div id="arch-root" data-composition-id="arch" data-width="1920" data-height="1080">
+        <div class="scene" id="arch-in">
+          <div class="eyebrow" data-layout-allow-overlap id="arch-eyebrow">05 · Architecture</div>
+          <div class="scene-title" data-layout-allow-overlap id="arch-title">Three models feed one dispatcher. One replay scores everything.</div>
+          <div class="diagram" id="arch-diagram">
+            <svg class="wires" viewBox="0 0 1920 1080" id="arch-svg"></svg>
+
+            <div class="group-label" id="arch-g1" style="left: 120px; top: 258px">data.py · seeded generator</div>
+            <div class="legend" id="arch-legend">
+              <span><i style="background: var(--c-data)"></i>data</span>
+              <span><i style="background: var(--c-model)"></i>models</span>
+              <span><i style="background: var(--c-opt)"></i>optimizer</span>
+              <span><i style="background: var(--c-eval)"></i>evaluation</span>
+              <span><i style="background: var(--c-risk)"></i>risk lever</span>
+            </div>
+
+            <div class="node L-data" id="n-a1" style="left: 120px; top: 300px; width: 290px; height: 112px">
+              <div class="t">Zone demand</div><div class="s">2 yrs × 40 zones</div></div>
+            <div class="node L-data" id="n-a2" style="left: 120px; top: 540px; width: 290px; height: 112px">
+              <div class="t">Shipments</div><div class="s">200k history</div></div>
+            <div class="node L-data" id="n-a3" style="left: 120px; top: 790px; width: 290px; height: 112px">
+              <div class="t">Orders</div><div class="s">24k · time windows</div></div>
+
+            <div class="node L-model" id="n-b1" style="left: 500px; top: 290px; width: 340px; height: 132px">
+              <div class="f">forecast.py</div><div class="t">Demand forecast</div><div class="s">XGBoost vs ETS · SARIMA</div></div>
+            <div class="node L-model" id="n-b2" style="left: 500px; top: 530px; width: 340px; height: 132px">
+              <div class="f">risk.py</div><div class="t">Misroute-risk model</div><div class="s">XGBoost · p(misroute)</div></div>
+
+            <div class="node L-opt" id="n-c1" style="left: 930px; top: 290px; width: 330px; height: 132px">
+              <div class="f">simulate.py</div><div class="t">Driver roster</div><div class="s">trucks per depot-day</div></div>
+            <div class="node L-opt hero" id="n-c2" style="left: 930px; top: 500px; width: 420px; height: 214px">
+              <div class="f">routing.py</div>
+              <div class="t">OR-Tools CVRPTW</div>
+              <div class="s">capacity · windows · shift</div>
+              <div class="s accent">+ misroute risk priced in km</div>
+              <div class="budget-row"><span>solve budget</span><b id="arch-budget-num">0.0 s</b></div>
+              <div class="budget"><div class="budget-fill" id="arch-budget-fill"></div></div>
+            </div>
+            <div class="node L-risk" id="n-c3" style="left: 930px; top: 800px; width: 420px; height: 132px">
+              <div class="f">risk.py</div><div class="t">Address check</div><div class="s">call top 5% before loading</div></div>
+
+            <div class="node L-opt" id="n-d1" style="left: 1400px; top: 539px; width: 210px; height: 132px">
+              <div class="t">Routes</div><div class="s">per depot-day</div></div>
+            <div class="node L-eval" id="n-e1" style="left: 1650px; top: 525px; width: 240px; height: 160px">
+              <div class="f">replay()</div><div class="t">Replay</div><div class="s">km · on-time</div><div class="s">misroutes</div></div>
+
+            <div class="wire-label" id="arch-l-loop" style="left: 1340px; top: 444px; color: var(--c-eval)">undelivered → rollover, age +1</div>
+            <div class="wire-label" id="arch-l-beta" style="left: 566px; top: 676px; color: var(--c-model)">+0.094 log-odds / stop</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const tl = gsap.timeline({ paused: true });
+          const D = 12.8;
+          const NS = "http://www.w3.org/2000/svg";
+          const COL = { data: "#7fa8ff", model: "#b9a2ff", opt: "#3fd8a8", eval: "#f2c46d", risk: "#ff8a73" };
+          tl.fromTo("#arch-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+          tl.fromTo("#arch-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
+          tl.fromTo("#arch-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+          tl.fromTo("#arch-diagram", { scale: 0.975 }, { scale: 1, duration: D, ease: "sine.out" }, 0);
+
+          const svg = document.getElementById("arch-svg");
+          // orthogonal wires; coordinates match the node boxes above; colour = source layer
+          const wires = [
+            { pts: [[410, 356], [500, 356]], at: 1.4, c: "data" },
+            { pts: [[410, 596], [500, 596]], at: 1.4, c: "data" },
+            { pts: [[840, 356], [930, 356]], at: 2.3, c: "model" },
+            { pts: [[1160, 422], [1160, 500]], at: 3.1, c: "opt" },
+            { pts: [[840, 596], [930, 596]], at: 3.1, c: "model" },
+            { pts: [[410, 846], [470, 846], [470, 760], [880, 760], [880, 666], [930, 666]], at: 3.1, c: "data" },
+            { pts: [[1350, 605], [1400, 605]], at: 4.3, c: "opt" },
+            { pts: [[1610, 605], [1650, 605]], at: 4.9, c: "opt" },
+            { pts: [[1770, 525], [1770, 482], [1310, 482], [1310, 500]], at: 5.6, c: "eval" },
+            { pts: [[540, 662], [540, 866], [930, 866]], at: 6.6, c: "risk" },
+            { pts: [[1350, 866], [1770, 866], [1770, 685]], at: 7.1, c: "risk" },
+          ];
+          const lenOf = (pts) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
+          wires.forEach((w, wi) => {
+            const p = document.createElementNS(NS, "path");
+            p.setAttribute("d", "M" + w.pts.map((q) => q.join(" ")).join(" L"));
+            p.setAttribute("class", "wire");
+            p.setAttribute("id", "arch-w" + wi);
+            p.setAttribute("stroke", COL[w.c]);
+            const L = lenOf(w.pts);
+            p.setAttribute("stroke-dasharray", L + " " + L);
+            p.setAttribute("stroke-dashoffset", String(L));
+            svg.appendChild(p);
+            w.len = L;
+            tl.fromTo(p, { attr: { "stroke-dashoffset": L } }, { attr: { "stroke-dashoffset": 0 }, duration: Math.max(0.35, L / 900), ease: "power2.inOut" }, w.at);
+          });
+
+          const pop = (sel, at, from) =>
+            tl.fromTo(sel, Object.assign({ opacity: 0, x: 0, y: 0 }, from), { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }, at);
+          tl.fromTo(["#arch-g1", "#arch-legend"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.7);
+          pop("#n-a1", 0.8, { x: -30 });
+          pop("#n-a2", 0.95, { x: -30 });
+          pop("#n-a3", 1.1, { x: -30 });
+          pop("#n-b1", 1.75, { y: 20 });
+          pop("#n-b2", 1.9, { y: 20 });
+          pop("#n-c1", 2.65, { y: 20 });
+          tl.fromTo("#n-c2", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, 3.5);
+          tl.fromTo("#arch-l-beta", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 3.7);
+          pop("#n-d1", 4.6, { x: -20 });
+          pop("#n-e1", 5.2, { x: -20 });
+          tl.fromTo("#arch-l-loop", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 6.0);
+          pop("#n-c3", 7.0, { x: -30 });
+
+          // solve budget fills 0 -> 6.0 s in real seconds
+          const budget = { v: 0 };
+          const bNum = document.getElementById("arch-budget-num");
+          tl.fromTo("#arch-budget-fill", { scaleX: 0 }, { scaleX: 1, duration: 6, ease: "none" }, 4.2);
+          tl.to(budget, { v: 6, duration: 6, ease: "none", onUpdate: () => { bNum.textContent = budget.v.toFixed(1) + " s"; } }, 4.2);
+          tl.to("#n-c2", { boxShadow: "0 0 70px rgba(63,216,168,0.35)", duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 5 }, 4.2);
+
+          // data packets along each wire (deterministic, finite repeats)
+          const FLOW_START = 7.6, FLOW_END = 12.3, SPEED = 520;
+          wires.forEach((w, wi) => {
+            const pts = w.pts;
+            const travel = Math.max(0.5, w.len / SPEED);
+            const kf = [];
+            for (let i = 1; i < pts.length; i++) {
+              const seg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+              kf.push({ attr: { cx: pts[i][0], cy: pts[i][1] }, duration: (travel * seg) / w.len, ease: "none" });
+            }
+            const packets = w.len > 400 ? 3 : 2;
+            for (let k = 0; k < packets; k++) {
+              const c = document.createElementNS(NS, "circle");
+              c.setAttribute("r", "7");
+              c.setAttribute("cx", pts[0][0]);
+              c.setAttribute("cy", pts[0][1]);
+              c.setAttribute("fill", COL[w.c]);
+              c.setAttribute("opacity", "0");
+              svg.appendChild(c);
+              const start = FLOW_START + (wi % 3) * 0.12 + (k * travel) / packets;
+              const reps = Math.max(0, Math.floor((FLOW_END - start) / travel) - 1);
+              tl.fromTo(c, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.15 }, start);
+              tl.to(c, { keyframes: kf, repeat: reps }, start);
+            }
+          });
+          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          window.__timelines["arch"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
