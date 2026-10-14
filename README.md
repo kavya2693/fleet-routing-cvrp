@@ -14,6 +14,172 @@ which lever actually cuts misrouted shipments in the pre-holiday peak.
 
 📄 **Audit report:** every figure and assumption in the video, traced to its source — [PDF](docs/demo/AUDIT_REPORT.pdf) · [Word](docs/demo/AUDIT_REPORT.docx) · [Markdown](docs/demo/AUDIT_REPORT.md)
 
+## At a glance
+
+| | |
+|---|---|
+| **Problem** | A 300-truck, four-depot fleet delivers about 2,200 orders a weekday (2,700 in the pre-holiday peak). Routes are built every evening, drivers are booked a week ahead from a forecast, and about 4% of shipments are misrouted, past 5% in the peak. |
+| **Approach** | A weekly zone-demand forecast books drivers; a misroute classifier scores each shipment before dispatch; OR-Tools solves a capacitated, time-windowed VRP per depot per day, with misroute risk priced by route position. One replay function scores every arm against the ground-truth hazard. |
+| **Result** | Peak week: **-22.1% road km** against the sweep dispatcher (140,683 to 109,607) with 8.1% fewer truck-days. Global XGBoost forecast: **peak WAPE 0.204** (classical models 0.259-0.337) and **8.7% of peak depot-days short of trucks** (26.9-53.8%). Phoning the top 5% of consignees before loading cuts peak misroutes **16.6%**. |
+| **What didn't win** | The XGBoost misroute model ties a two-line supervisor rule (16.4% vs 16.6% reduction; ROC-AUC 0.645 against a 0.647 ceiling). Pricing risk in the router only recovers what tighter routes cost (4.58% to 4.39% misroutes for +4.0% km). The better forecast moved peak lead time by 0.001 days. |
+
+## Architecture
+
+![Architecture walkthrough: sources, forecast and risk models, the per-depot dispatcher and the replay that scores it](docs/demo/architecture.gif)
+
+```mermaid
+flowchart LR
+    subgraph SRC["Sources"]
+        GEN["Seeded generator<br/>scripts/generate_data.py<br/>data.py"]
+        ZD[("zone_demand.csv<br/>observed, gappy feed")]
+        ZT[("zone_demand_true.csv<br/>what was ordered")]
+        SH[("shipments_history.csv<br/>200k shipments")]
+        DO[("dispatch_orders.csv<br/>~24k orders")]
+        NET[("zones.csv · depots.csv")]
+    end
+
+    subgraph FEAT["Data and features"]
+        LOAD["Loader<br/>data.load"]
+        CLEAN["Gap fill + lag/calendar features<br/>forecast.py"]
+    end
+
+    subgraph MOD["Models"]
+        FC["Zone demand forecast<br/>naive · ETS · SARIMA · XGBoost<br/>forecast.py"]
+        RC["Misroute classifier<br/>XGBoost depth 2<br/>risk.fit"]
+        BETA["Position effect beta<br/>risk.estimate_position_effect"]
+    end
+
+    subgraph DEC["Decision and optimiser"]
+        ROS["Driver booking<br/>simulate.roster_size"]
+        SLOPE["Risk price p(1-p)<br/>risk.position_slope"]
+        DISP["Dispatch loop + backlog<br/>simulate.run_window"]
+        ORT["CVRPTW solve, 6 s<br/>routing.ortools_plan"]
+        SW["Sweep baseline<br/>routing.sweep_plan"]
+    end
+
+    subgraph EVAL["Evaluation"]
+        REP["Replay, the only scorer<br/>routing.replay"]
+        HAZ["Ground-truth hazard<br/>data.misroute_probability"]
+        FSC["Forecast + roster scoring<br/>forecast.score · simulate.roster_scores"]
+        ACK["Address-check what-if<br/>risk.address_check_effect"]
+    end
+
+    subgraph OUT["Outputs"]
+        REPORT[("outputs/full/<br/>report.md · *.csv · results.json")]
+        MAP["Route map<br/>plot.route_map"]
+    end
+
+    GEN --> ZD & ZT & SH & DO & NET
+    ZD --> LOAD
+    ZT --> LOAD
+    SH --> LOAD
+    DO --> LOAD
+    NET --> LOAD
+    LOAD -->|"zone x day counts"| CLEAN
+    CLEAN -->|"features at least 7 days old"| FC
+    LOAD -->|"pre-dispatch facts"| RC
+    LOAD -->|"facts + route_position"| BETA
+    FC -->|"orders per depot-day"| ROS
+    RC -->|"p per order"| SLOPE
+    BETA -->|"log-odds per stop"| DISP
+    ROS -->|"truck capacities"| DISP
+    SLOPE -->|"risk_slope"| DISP
+    DISP -->|"Instance per depot"| ORT
+    DISP -->|"Instance per depot"| SW
+    ORT -->|"Plan"| REP
+    SW -->|"Plan"| REP
+    HAZ -->|"p at actual position"| REP
+    REP -->|"served stops, routes"| DISP
+    REP -.->|"dropped stops roll over, age +1"| DISP
+    ORT -.->|"no solution: every stop carried"| DISP
+    ZD -.->|"missing zone-days filled from last week"| CLEAN
+    FC --> FSC
+    ZT --> FSC
+    REP --> ACK
+    RC --> ACK
+    REP --> REPORT
+    FSC --> REPORT
+    ACK --> REPORT
+    REP --> MAP
+
+    classDef data fill:#7fa8ff,stroke:#3d6fd9,color:#0b1020
+    classDef model fill:#b9a2ff,stroke:#7a5fd6,color:#0b1020
+    classDef decision fill:#3fd8a8,stroke:#1f9c76,color:#0b1020
+    classDef evaluation fill:#f2c46d,stroke:#b8902f,color:#0b1020
+    classDef risk fill:#ff8a73,stroke:#cc5640,color:#0b1020
+
+    class GEN,ZD,ZT,SH,DO,NET,LOAD,CLEAN,REPORT,MAP data
+    class FC,BETA model
+    class RC,SLOPE risk
+    class ROS,DISP,ORT,SW decision
+    class REP,HAZ,FSC,ACK evaluation
+```
+
+Solid edges are the nightly data flow; dotted edges are the fallback and feedback paths. Red
+nodes are where misroute risk enters the system.
+
+### Components
+
+| Component | Responsibility | File |
+|---|---|---|
+| Data generator | Network, two years of zone demand with gaps and outliers, shipment history, dispatch orders, and the ground-truth misroute hazard | [`scripts/generate_data.py`](scripts/generate_data.py), [`src/fleet_routing/data.py`](src/fleet_routing/data.py) |
+| Run profiles and constants | `full` (300 trucks) and `small` (CI) profiles; fleet mix, shift, speed, roster headroom, misroute cost | [`src/fleet_routing/config.py`](src/fleet_routing/config.py) |
+| Demand forecast | Weekly-origin backtest of seasonal naive, ETS, SARIMA and a global XGBoost; WAPE and bias split by peak | [`src/fleet_routing/forecast.py`](src/fleet_routing/forecast.py) |
+| Misroute risk | XGBoost and logistic classifiers, supervisor rule, ceiling; position-effect estimate; address-check what-if | [`src/fleet_routing/risk.py`](src/fleet_routing/risk.py) |
+| Router | Sweep baseline, OR-Tools CVRPTW with droppable stops and the position price, and `replay` | [`src/fleet_routing/routing.py`](src/fleet_routing/routing.py) |
+| Dispatcher loop | Books trucks from the forecast, solves each depot-day, carries the backlog, runs clear-out days, summarises each arm | [`src/fleet_routing/simulate.py`](src/fleet_routing/simulate.py) |
+| Orchestrator | One command end to end: data, backtest, classifier, every arm, address checks, report | [`src/fleet_routing/cli.py`](src/fleet_routing/cli.py) |
+| Route map | Side-by-side sweep vs risk-priced routes for the busiest depot | [`src/fleet_routing/plot.py`](src/fleet_routing/plot.py) |
+
+### Design decisions
+
+| Decision | Options considered | Chosen | Trade-off |
+|---|---|---|---|
+| How misroute risk reaches the router | Hard "risky stops first" rule; dedicated trucks for risky shipments; risk as drop priority; a price per route position | Price per position, `misroute_cost_km x beta x p(1-p)` in km ([ADR-0001](docs/adr/0001-price-misroute-risk-by-route-position.md)) | The price is explicit and comparable with distance, but the gain is bounded and second order: reordering cannot make a trailer shallower |
+| Route position in the classifier | Include it as a feature; leave it out and estimate it separately | Left out; `beta` comes from a logistic regression on history | The classifier cannot score the router's own choice; the routing result now rests on `beta`, which needs real route histories to confirm |
+| Who reports routing metrics | Each planner reports its own; one shared replay | One `replay` drives the finished routes and scores them with the true hazard | An extra code path that has to be right, so it is tested first, against deliberately broken plans |
+| Time windows | Soft windows with a lateness cost; hard windows with droppable stops | Hard windows; stops that do not fit are dropped at 1,000 km x (1 + days waited) | 100% on time by construction; the cost shows up as rollovers and next-day share instead |
+| Demand model for booking drivers | Seasonal naive; per-zone ETS and SARIMA; one global XGBoost; LSTM | Global XGBoost on calendar and lag features at least 7 days old | Best WAPE and smallest peak bias with no recursion; LSTM rejected as a CI dependency with no expected gain at two years of history |
+| Solver budget | Long solves; a fixed wall-clock limit per depot-day | 6 s per depot-day, guided local search from a cheapest-arc start | The full run finishes on a laptop, but results vary slightly with machine load (87,715 vs 88,698 km in two quiet-week runs) |
+
+### Data contracts
+
+| Stage | Input | Output |
+|---|---|---|
+| Generator to loader | profile (seed, fleet, zones, dates) | `zone_demand.csv` and `zone_demand_true.csv`: `date` index x one integer column per zone (observed feed has gaps); `shipments_history.csv`: `zone, date, pallets, weight_kg, address_quality` (float), `postcode_mismatch, new_consignee, relabelled, handwritten_label, hazmat, express` (0/1), `dist_to_depot_km, boundary_ratio, zone_density, is_peak, dow, route_position` (int), `misrouted` (0/1); `dispatch_orders.csv`: the same pre-dispatch facts plus `order_id, x, y, depot, tw_start, tw_end, service_min` (minutes after midnight) |
+| Forecast | observed zone x day counts, origin Monday | long frame `date, zone, model, forecast` (float), seven days per origin |
+| Risk | history with `misrouted` | `RiskModel` (`predict -> p`, `beta_position` float), `risk_scores.csv`: `model, period, roc_auc, pr_auc, recall_top10, brier, base_rate, n` |
+| Router | `Instance`: depot `(x, y)`, stops frame `x, y, pallets, tw_start, tw_end, service_min, age_days, risk_slope`, `capacities: list[int]` | `Plan`: `routes: list[list[int]]` in visiting order, `solve_seconds`, `meta` |
+| Replay | `Instance`, `Plan` | per-stop `stop, vehicle, position, arrive, service_start, late`; per-route `vehicle, stops, km, return, load, capacity, overtime` |
+| Dispatcher loop | orders for the window, depots, depot-day forecast, `beta` | one row per delivered order (`position, late, dispatch_date, p_true, lead_days`), routes driven, `stranded` count; summarised to `routing_summary.csv` |
+
+### Failure modes and fallbacks
+
+| Failure | What the code does |
+|---|---|
+| Order feed late or missing for a zone-day (1.2% of zone-days plus a four-day outage) | ETS and SARIMA fill a gap from the same weekday a week earlier, then interpolate; seasonal naive uses the week before; XGBoost trains only on rows with an observed count. Forecasts are scored on the true counts, so the gaps cost accuracy rather than hiding it. |
+| Forecast runs low and too few drivers are booked | Booking carries 10% headroom and assumes 85% truck fill, capped at the depot's fleet. Orders that still do not fit are dropped, carried to the next day with their age incremented, and penalised harder the longer they wait. After the window, up to three clear-out days run with the full fleet; anything left is counted as stranded, not chased. |
+| Solver hits its time limit | Each OR-Tools solve stops at its wall-clock limit and returns its best routes so far. A solve that overruns three times its limit on a loaded machine is logged as `slow solve`. If no solution is found at all, every stop for that depot-day rolls to the next day. |
+| A stop cannot be served inside its window | It is dropped rather than visited late, and rolls over. |
+| Classifier degrades | Not handled. Both models are retrained on each run and are not monitored for drift; this is listed in the limitations below. |
+| LLM timeout | Not applicable: there is no LLM, model server or network call anywhere in the pipeline. |
+
+### Path to production
+
+This is a mapping of each local piece to what would replace it in a deployed system, not a
+description of one that exists.
+
+| Here | Production equivalent |
+|---|---|
+| Seeded generator writing CSVs to `data/` | Order feed from the TMS/WMS into a warehouse (BigQuery, Snowflake or Redshift), partitioned by order date |
+| Straight-line distance x 1.3 at 50 km/h | Road-network travel-time matrix (OSRM or Valhalla self-hosted, or a routing API) with time-of-day speeds |
+| `make run` on a laptop | Two scheduled jobs in Airflow or Step Functions: Monday forecast and driver booking; evening dispatch |
+| Per-depot solves in one process | One container job per depot-day (Cloud Run Jobs, AWS Batch or Kubernetes Jobs) in parallel, with a longer limit and a warm start from yesterday's routes |
+| Classifier and forecaster retrained each run | Versioned models in a registry (MLflow, SageMaker or Vertex AI), retrained weekly, promoted only if they beat the incumbent on the held-out window |
+| `replay` against the generator's hazard | Shadow mode: score planned routes against what telematics says was actually driven and against logged misroutes |
+| `outputs/full/report.md` and the address-check ranking | Dispatcher dashboard, and a daily call list pushed to the dispatch office queue |
+| Monitoring (not built) | Weekly forecast WAPE and peak bias by depot; misroute rate predicted vs observed; feature drift on the risk inputs; solve time and dropped-stop count per depot-day; an alert when peak bias goes below -5% before drivers are booked |
+
 ## The problem
 
 A regional freight operator runs about 300 trucks out of four depots and delivers about 2,200
