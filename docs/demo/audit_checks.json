@@ -1,0 +1,454 @@
+{
+ "generated": "2026-10-14 13:44",
+ "commit": "c9b3c09d094cd863c61c2af426513b6d9b33ba68",
+ "checks": [
+  {
+   "id": "F-01",
+   "shown": "3 industry chips",
+   "type": "general-knowledge",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Context statement, not a repo output."
+  },
+  {
+   "id": "F-02",
+   "shown": "4 problem cards",
+   "type": "general-knowledge",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-03",
+   "shown": "300 trucks",
+   "type": "direct",
+   "computed": "300",
+   "expect": "300",
+   "status": "pass"
+  },
+  {
+   "id": "F-04",
+   "shown": "4 depots",
+   "type": "direct",
+   "computed": "4",
+   "expect": "4",
+   "status": "pass"
+  },
+  {
+   "id": "F-05",
+   "shown": "Up to 2,800 orders a day",
+   "type": "derived",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-06",
+   "shown": "every stop has a delivery window",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-07",
+   "shown": "trailer capacity + shift limits",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-08",
+   "shown": ">5% of peak shipments misrouted",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-09",
+   "shown": "OR-Tools, 6 s per depot / solve budget 6.0 s",
+   "type": "direct",
+   "computed": "6.0",
+   "expect": "6.0",
+   "status": "pass"
+  },
+  {
+   "id": "F-10",
+   "shown": "EVERY MONDAY",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-11",
+   "shown": "windows kept / fewer km / fewer trucks",
+   "type": "derived",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-12",
+   "shown": "build, score, improve",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-13",
+   "shown": "Later stops are riskier",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-14",
+   "shown": "-4.2% misroutes",
+   "type": "derived",
+   "computed": "-4.2%",
+   "expect": "-4.2%",
+   "status": "pass"
+  },
+  {
+   "id": "F-15",
+   "shown": "+4.0% km",
+   "type": "derived",
+   "computed": "+4.0%",
+   "expect": "+4.0%",
+   "status": "pass"
+  },
+  {
+   "id": "F-16",
+   "shown": "2 yrs x 40 zones",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-17",
+   "shown": "200k history",
+   "type": "direct",
+   "computed": "200,000",
+   "expect": "200,000",
+   "status": "pass"
+  },
+  {
+   "id": "F-18",
+   "shown": "24k",
+   "type": "direct",
+   "computed": "24k",
+   "expect": "24k",
+   "status": "pass"
+  },
+  {
+   "id": "F-19",
+   "shown": "+0.094 log-odds / stop",
+   "type": "direct",
+   "computed": "0.094",
+   "expect": "0.094",
+   "status": "pass"
+  },
+  {
+   "id": "F-20",
+   "shown": "forecast.py, risk.py, simulate.py, routing.py, replay(), data.py",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-21",
+   "shown": "call top 5% before loading",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-22",
+   "shown": "Depot 3 \u00b7 dispatch 2025-12-09",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-23",
+   "shown": "104 trucks",
+   "type": "direct",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Read from the PNG title; the repo does not save per-depot-day routes. Cross-check: depot 3 fleet = 104 (depots.csv)."
+  },
+  {
+   "id": "F-24",
+   "shown": "11,368 km",
+   "type": "direct",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Read from the PNG title; not persisted in any CSV."
+  },
+  {
+   "id": "F-25",
+   "shown": "93 trucks",
+   "type": "direct",
+   "computed": "93",
+   "expect": "93",
+   "status": "pass"
+  },
+  {
+   "id": "F-26",
+   "shown": "8,574 km",
+   "type": "direct",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Read from the PNG title. The single-day re-run (assets/dispatch_sheet.json) gives 8,412.7 km because the solver stops on wall-clock time (A-04)."
+  },
+  {
+   "id": "F-27",
+   "shown": "-24.6% km",
+   "type": "derived",
+   "computed": "-24.6%",
+   "expect": "-24.6%",
+   "status": "pass"
+  },
+  {
+   "id": "F-28",
+   "shown": "13,554 orders",
+   "type": "direct",
+   "computed": "13,554",
+   "expect": "13,554",
+   "status": "pass"
+  },
+  {
+   "id": "F-29",
+   "shown": "140,683 km",
+   "type": "direct",
+   "computed": "140,683",
+   "expect": "140,683",
+   "status": "pass"
+  },
+  {
+   "id": "F-30",
+   "shown": "109,607 km",
+   "type": "direct",
+   "computed": "109,607",
+   "expect": "109,607",
+   "status": "pass"
+  },
+  {
+   "id": "F-31",
+   "shown": "-22.1%",
+   "type": "derived",
+   "computed": "-22.1%",
+   "expect": "-22.1%",
+   "status": "pass"
+  },
+  {
+   "id": "F-32",
+   "shown": "93 trucks",
+   "type": "direct",
+   "computed": "93",
+   "expect": "93",
+   "status": "pass"
+  },
+  {
+   "id": "F-33",
+   "shown": "910 orders",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-34",
+   "shown": "all inside their delivery windows",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-35",
+   "shown": "8,413 km",
+   "type": "direct",
+   "computed": "8,413",
+   "expect": "8,413",
+   "status": "pass"
+  },
+  {
+   "id": "F-36",
+   "shown": "T-013, T-025, T-031, T-035, T-039, T-054",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-37",
+   "shown": "+ 87 more trucks",
+   "type": "derived",
+   "computed": "87",
+   "expect": "87",
+   "status": "pass"
+  },
+  {
+   "id": "F-38",
+   "shown": "-8.1%",
+   "type": "derived",
+   "computed": "-8.1%",
+   "expect": "-8.1%",
+   "status": "pass"
+  },
+  {
+   "id": "F-39",
+   "shown": "1,457",
+   "type": "direct",
+   "computed": "1,457",
+   "expect": "1,457",
+   "status": "pass"
+  },
+  {
+   "id": "F-40",
+   "shown": "1,339",
+   "type": "direct",
+   "computed": "1,339",
+   "expect": "1,339",
+   "status": "pass"
+  },
+  {
+   "id": "F-41",
+   "shown": "0.208",
+   "type": "direct",
+   "computed": "0.208",
+   "expect": "0.208",
+   "status": "pass"
+  },
+  {
+   "id": "F-42",
+   "shown": "ETS 0.260",
+   "type": "direct",
+   "computed": "0.260",
+   "expect": "0.260",
+   "status": "pass"
+  },
+  {
+   "id": "F-43",
+   "shown": "naive 0.344",
+   "type": "direct",
+   "computed": "0.344",
+   "expect": "0.344",
+   "status": "pass"
+  },
+  {
+   "id": "F-44",
+   "shown": "8.7%",
+   "type": "direct",
+   "computed": "8.7%",
+   "expect": "8.7%",
+   "status": "pass"
+  },
+  {
+   "id": "F-45",
+   "shown": "ETS forecast: 53.8%",
+   "type": "direct",
+   "computed": "53.8%",
+   "expect": "53.8%",
+   "status": "pass"
+  },
+  {
+   "id": "F-46",
+   "shown": "16.6%",
+   "type": "direct",
+   "computed": "16.6%",
+   "expect": "16.6%",
+   "status": "pass"
+  },
+  {
+   "id": "F-47",
+   "shown": "16.4%",
+   "type": "direct",
+   "computed": "16.4%",
+   "expect": "16.4%",
+   "status": "pass"
+  },
+  {
+   "id": "F-48",
+   "shown": "15.8%",
+   "type": "direct",
+   "computed": "15.8%",
+   "expect": "15.8%",
+   "status": "pass"
+  },
+  {
+   "id": "F-49",
+   "shown": "1.1%",
+   "type": "direct",
+   "computed": "1.1%",
+   "expect": "1.1%",
+   "status": "pass"
+  },
+  {
+   "id": "F-50",
+   "shown": "ROC-AUC 0.645",
+   "type": "direct",
+   "computed": "0.645",
+   "expect": "0.645",
+   "status": "pass"
+  },
+  {
+   "id": "F-51",
+   "shown": "ROC-AUC 0.647",
+   "type": "direct",
+   "computed": "0.647",
+   "expect": "0.647",
+   "status": "pass"
+  },
+  {
+   "id": "F-52",
+   "shown": "ceiling AUC 0.647",
+   "type": "direct",
+   "computed": "0.647",
+   "expect": "0.647",
+   "status": "pass"
+  },
+  {
+   "id": "F-53",
+   "shown": "MIT",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-54",
+   "shown": "~18 min",
+   "type": "derived",
+   "computed": "~18 min",
+   "expect": "~18 min",
+   "status": "pass"
+  },
+  {
+   "id": "F-55",
+   "shown": "OR-Tools \u00b7 XGBoost \u00b7 statsmodels \u00b7 Python",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-56",
+   "shown": "$ make run",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  }
+ ]
+}
