@@ -247,7 +247,7 @@ pricing risk inside the router is a weak lever.
 
 | Quiet week (10,840 orders) | Sweep baseline | OR-Tools | OR-Tools, risk-priced |
 |---|---:|---:|---:|
-| Road km | 105,490 | 88,698 (-15.9%) | 91,829 (-12.9%) |
+| Road km | 105,490 | 88,698 (-15.9%) | 91,829 (-13.0%) |
 | Truck-days | 1,058 | 1,018 | 1,059 |
 | Stops on time | 79.9% | 100% | 100% |
 | Expected misroute rate | 3.07% | 3.16% | 2.98% |
