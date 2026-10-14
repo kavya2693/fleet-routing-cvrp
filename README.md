@@ -8,9 +8,9 @@ Next-day routes for a 300-truck regional freight fleet: book drivers from a zone
 demand forecast, route a few thousand time-windowed stops a day with OR-Tools, and find out
 which lever actually cuts misrouted shipments in the pre-holiday peak.
 
-[![84-second silent walkthrough: the industry problem, how it works, the architecture, the routes, the dispatcher's sheet and the results](docs/demo/demo.gif)](https://kavya2693.github.io/work-demos/fleet-routing-cvrp.mp4)
+[![87-second silent walkthrough: the industry problem, how it works, the architecture, the routes, the dispatcher's sheet, the results, and the routing lesson with the fix the repo applies](docs/demo/demo.gif)](https://kavya2693.github.io/work-demos/fleet-routing-cvrp.mp4)
 
-*84-second silent walkthrough. [Play the full video](https://kavya2693.github.io/work-demos/fleet-routing-cvrp.mp4) · [download the MP4, 6 MB](docs/demo/demo.mp4).*
+*87-second silent walkthrough. [Play the full video](https://kavya2693.github.io/work-demos/fleet-routing-cvrp.mp4) · [download the MP4, 6 MB](docs/demo/demo.mp4).*
 
 📄 **Audit report:** every figure and assumption in the video, traced to its source — [PDF](docs/demo/AUDIT_REPORT.pdf) · [Word](docs/demo/AUDIT_REPORT.docx) · [Markdown](docs/demo/AUDIT_REPORT.md)
 

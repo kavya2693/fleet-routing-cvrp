@@ -15,7 +15,7 @@
         #arch-root .node .t { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); white-space: nowrap; }
         #arch-root .node .s { font-family: var(--mono); font-size: 22px; color: var(--ink-soft); white-space: nowrap; }
         #arch-root .node .f {
-          position: absolute; right: 14px; top: -16px; font-family: var(--mono); font-size: 20px; padding: 2px 10px;
+          position: absolute; right: 14px; top: -17px; font-family: var(--mono); font-size: 22px; padding: 0 10px;
           border-radius: 6px; background: var(--bg); border: 2px solid var(--line);
         }
         #arch-root .L-data { border-color: rgba(127, 168, 255, 0.55); }
@@ -36,7 +36,7 @@
         #arch-root .budget-fill { position: absolute; left: 0; top: 0; width: 100%; height: 10px; background: var(--c-opt); transform-origin: left center; }
         #arch-root .budget-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 22px; color: var(--ink-soft); }
         #arch-root .budget-row b { color: var(--c-opt); font-weight: 700; }
-        #arch-root .group-label { position: absolute; font-family: var(--mono); font-size: 22px; color: var(--ink-mute); letter-spacing: 0.04em; }
+        #arch-root .group-label { position: absolute; font-family: var(--mono); font-size: 22px; color: var(--ink-soft); letter-spacing: 0.04em; }
         #arch-root .legend {
           position: absolute; right: 120px; top: 232px; display: flex; gap: 26px;
           font-family: var(--mono); font-size: 22px; color: var(--ink-soft);
@@ -50,6 +50,7 @@
         <div class="scene" id="arch-in">
           <div class="eyebrow" data-layout-allow-overlap id="arch-eyebrow">05 · Architecture</div>
           <div class="scene-title" data-layout-allow-overlap id="arch-title">Three models feed one dispatcher. One replay scores everything.</div>
+          <div class="scene-sub" id="arch-sub">Each box is a file in the repo. Data flows left to right; one replay scores every plan the same way.</div>
           <div class="diagram" id="arch-diagram">
             <svg class="wires" viewBox="0 0 1920 1080" id="arch-svg"></svg>
 
@@ -65,20 +66,20 @@
             <div class="node L-data" id="n-a1" style="left: 120px; top: 300px; width: 290px; height: 112px">
               <div class="t">Zone demand</div><div class="s">2 yrs × 40 zones</div></div>
             <div class="node L-data" id="n-a2" style="left: 120px; top: 540px; width: 290px; height: 112px">
-              <div class="t">Shipments</div><div class="s">200k history</div></div>
+              <div class="t">Shipments</div><div class="s">200k past shipments</div></div>
             <div class="node L-data" id="n-a3" style="left: 120px; top: 790px; width: 290px; height: 112px">
               <div class="t">Orders</div><div class="s">24k · time windows</div></div>
 
             <div class="node L-model" id="n-b1" style="left: 500px; top: 290px; width: 340px; height: 132px">
               <div class="f">forecast.py</div><div class="t">Demand forecast</div><div class="s">XGBoost vs ETS · SARIMA</div></div>
-            <div class="node L-model" id="n-b2" style="left: 500px; top: 530px; width: 340px; height: 132px">
-              <div class="f">risk.py</div><div class="t">Misroute-risk model</div><div class="s">XGBoost · p(misroute)</div></div>
+            <div class="node L-model" id="n-b2" style="left: 500px; top: 518px; width: 340px; height: 156px">
+              <div class="f">risk.py</div><div class="t">Misroute-risk model</div><div class="s">XGBoost</div><div class="s">chance of misroute</div></div>
 
             <div class="node L-opt" id="n-c1" style="left: 930px; top: 290px; width: 330px; height: 132px">
               <div class="f">simulate.py</div><div class="t">Driver roster</div><div class="s">trucks per depot-day</div></div>
             <div class="node L-opt hero" id="n-c2" style="left: 930px; top: 500px; width: 420px; height: 214px">
               <div class="f">routing.py</div>
-              <div class="t">OR-Tools CVRPTW</div>
+              <div class="t">OR-Tools route solver</div>
               <div class="s">capacity · windows · shift</div>
               <div class="s accent">+ misroute risk priced in km</div>
               <div class="budget-row"><span>solve budget</span><b id="arch-budget-num">0.0 s</b></div>
@@ -93,7 +94,7 @@
               <div class="f">replay()</div><div class="t">Replay</div><div class="s">km · on-time</div><div class="s">misroutes</div></div>
 
             <div class="wire-label" id="arch-l-loop" style="left: 1340px; top: 444px; color: var(--c-eval)">undelivered → rollover, age +1</div>
-            <div class="wire-label" id="arch-l-beta" style="left: 566px; top: 676px; color: var(--c-model)">+0.094 log-odds / stop</div>
+            <div class="wire-label" id="arch-l-beta" style="left: 566px; top: 690px; color: var(--c-model)">later stops are riskier</div>
           </div>
         </div>
       </div>
@@ -107,6 +108,7 @@
           tl.fromTo("#arch-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
           tl.fromTo("#arch-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
           tl.fromTo("#arch-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+          tl.fromTo("#arch-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.5);
           tl.fromTo("#arch-diagram", { scale: 0.975 }, { scale: 1, duration: D, ease: "sine.out" }, 0);
 
           const svg = document.getElementById("arch-svg");
@@ -121,7 +123,7 @@
             { pts: [[1350, 605], [1400, 605]], at: 4.3, c: "opt" },
             { pts: [[1610, 605], [1650, 605]], at: 4.9, c: "opt" },
             { pts: [[1770, 525], [1770, 482], [1310, 482], [1310, 500]], at: 5.6, c: "eval" },
-            { pts: [[540, 662], [540, 866], [930, 866]], at: 6.6, c: "risk" },
+            { pts: [[540, 674], [540, 866], [930, 866]], at: 6.6, c: "risk" },
             { pts: [[1350, 866], [1770, 866], [1770, 685]], at: 7.1, c: "risk" },
           ];
           const lenOf = (pts) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
@@ -187,7 +189,7 @@
               tl.to(c, { keyframes: kf, repeat: reps }, start);
             }
           });
-          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.8); // dip: fully out before the next scene starts
           window.__timelines["arch"] = tl;
         })();
       </script>

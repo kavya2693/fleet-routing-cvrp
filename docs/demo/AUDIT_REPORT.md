@@ -2,9 +2,9 @@
 
 **Repository:** https://github.com/kavya2693/fleet-routing-cvrp  
 **Numbers taken from commit:** `c9b3c09` (outputs last changed in `c9b3c09 (2026-10-13 21:56:42 +0400)`)  
-**Video:** `docs/demo/demo.mp4` (84.0 s, 1920x1080, 30 fps, silent)  
-**Generated:** 2026-10-14 13:44  
-**Automated checks:** 52 pass · 0 fail · 4 manual (of 56 figures)
+**Video:** `docs/demo/demo.mp4` (87.2 s, 1920x1080, 30 fps, silent)  
+**Generated:** 2026-10-14 18:34  
+**Automated checks:** 56 pass · 0 fail · 4 manual (of 60 figures)
 
 ## How to use this report
 
@@ -42,13 +42,12 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-12 | build, score, improve | 03 | `src/fleet_routing/routing.py:229-230` | PATH_CHEAPEST_ARC + GUIDED_LOCAL_SEARCH | - | direct | ✓ verified |
 | F-13 | Later stops are riskier | 04 | `src/fleet_routing/data.py:238-241; outputs/full/results.json position_effect_logodds_per_stop` | 0.09 generated, 0.094 estimated | estimated slope > 0 | direct | ✓ verified |
 | F-14 | -4.2% misroutes | 04 | `outputs/full/routing_summary.csv` | window=peak, misroute_pct: ortools_risk 4.3871, ortools 4.5810 | (4.3871 - 4.5810) / 4.5810 x 100 = -4.23% | derived | ✓ verified |
-| F-15 | +4.0% km | 04 | `outputs/full/routing_summary.csv` | window=peak, total_km: ortools_risk 113,937.7, ortools 109,607.3 | (113,937.7 - 109,607.3) / 109,607.3 x 100 = +3.95% | derived | ✓ verified |
+| F-15 | +4.0% km | 04, 09 | `outputs/full/routing_summary.csv` | window=peak, total_km: ortools_risk 113,937.7, ortools 109,607.3 | (113,937.7 - 109,607.3) / 109,607.3 x 100 = +3.95% | derived | ✓ verified |
 | F-16 | 2 yrs x 40 zones | 05, 08 | `data/full/zone_demand.csv; outputs/full/results.json zones` | 731 daily rows 2024-01-01..2025-12-31; zones = 40 | - | direct | ✓ verified |
 | F-17 | 200k history | 05 | `data/full/shipments_history.csv` | row count | - | direct | ✓ verified |
 | F-18 | 24k | 05 | `outputs/full/results.json` | dispatch_orders = 24,394 | 24,394 rounded to thousands | direct | ✓ verified |
-| F-19 | +0.094 log-odds / stop | 05 | `outputs/full/results.json` | position_effect_logodds_per_stop | - | direct | ✓ verified |
 | F-20 | forecast.py, risk.py, simulate.py, routing.py, replay(), data.py | 05 | `src/fleet_routing/` | files + def replay | - | direct | ✓ verified |
-| F-21 | call top 5% before loading | 05, 09 | `src/fleet_routing/config.py:93` | ADDRESS_CHECK_SHARE = 0.05 | - | direct | ✓ verified |
+| F-21 | call top 5% before loading | 05 | `src/fleet_routing/config.py:93` | ADDRESS_CHECK_SHARE = 0.05 | - | direct | ✓ verified |
 | F-22 | Depot 3 · dispatch 2025-12-09 | 06 | `data/full/depots.csv (busiest depot); src/fleet_routing/cli.py:121-125; config peak window` | depot with most vehicles = 3; first peak dispatch = 2025-12-08 + 1 day | - | direct | ✓ verified |
 | F-23 | 104 trucks | 06 | `outputs/full/route_map.png (left panel title)` | plot title | - | direct | manual: Read from the PNG title; the repo does not save per-depot-day routes. Cross-check: depot 3 fleet = 104 (depots.csv). |
 | F-24 | 11,368 km | 06 | `outputs/full/route_map.png (left panel title)` | plot title | - | direct | manual: Read from the PNG title; not persisted in any CSV. |
@@ -56,8 +55,8 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-26 | 8,574 km | 06 | `outputs/full/route_map.png (right panel title)` | plot title | - | direct | manual: Read from the PNG title. The single-day re-run (assets/dispatch_sheet.json) gives 8,412.7 km because the solver stops on wall-clock time (A-04). |
 | F-27 | -24.6% km | 06 | `F-24, F-26 (plot titles)` | 8,574 vs 11,368 | (8,574 - 11,368) / 11,368 x 100 = -24.58% | derived | ✓ verified |
 | F-28 | 13,554 orders | 06 | `outputs/full/routing_summary.csv` | arm=sweep, window=peak, orders | - | direct | ✓ verified |
-| F-29 | 140,683 km | 06, 08 | `outputs/full/routing_summary.csv` | arm=sweep, window=peak, total_km | - | direct | ✓ verified |
-| F-30 | 109,607 km | 06, 08 | `outputs/full/routing_summary.csv` | arm=ortools, window=peak, total_km | - | direct | ✓ verified |
+| F-29 | 140,683 km | 06, 08, 09 | `outputs/full/routing_summary.csv` | arm=sweep, window=peak, total_km | - | direct | ✓ verified |
+| F-30 | 109,607 km | 06, 08, 09 | `outputs/full/routing_summary.csv` | arm=ortools, window=peak, total_km | - | direct | ✓ verified |
 | F-31 | -22.1% | 06, 08 | `outputs/full/routing_summary.csv` | F-30 vs F-29 | (109,607.3 - 140,683.4) / 140,683.4 x 100 = -22.09% | derived | ✓ verified |
 | F-32 | 93 trucks | 07 | `demo assets/dispatch_sheet.json (re-run of the repo's routing for Depot 3, 2025-12-09)` | trucks_used (rostered 104) | - | direct | ✓ verified |
 | F-33 | 910 orders | 07 | `demo assets/dispatch_sheet.json; data/full/dispatch_orders.csv` | orders on 2025-12-08 for depot 3 | - | direct | ✓ verified |
@@ -73,19 +72,24 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-43 | naive 0.344 | 08 | `outputs/full/forecast_scores.csv` | model=seasonal_naive, period=all, wape | - | direct | ✓ verified |
 | F-44 | 8.7% | 08 | `outputs/full/roster_scores.csv` | model=xgboost, period=peak, short_depot_days_pct | - | direct | ✓ verified |
 | F-45 | ETS forecast: 53.8% | 08 | `outputs/full/roster_scores.csv` | model=ets, period=peak, short_depot_days_pct | - | direct | ✓ verified |
-| F-46 | 16.6% | 09 | `outputs/full/address_checks.csv` | ranked_by=rule, window=peak, reduction_pct | - | direct | ✓ verified |
-| F-47 | 16.4% | 09 | `outputs/full/address_checks.csv` | ranked_by=xgboost, window=peak, reduction_pct | - | direct | ✓ verified |
-| F-48 | 15.8% | 09 | `outputs/full/address_checks.csv` | ranked_by=logistic, window=peak, reduction_pct | - | direct | ✓ verified |
-| F-49 | 1.1% | 09 | `outputs/full/address_checks.csv` | ranked_by=random, window=peak, reduction_pct | - | direct | ✓ verified |
-| F-50 | ROC-AUC 0.645 | 09 | `outputs/full/risk_scores.csv` | model=xgboost, period=all, roc_auc | - | direct | ✓ verified |
-| F-51 | ROC-AUC 0.647 | 09 | `outputs/full/risk_scores.csv` | model=logistic, period=all, roc_auc | - | direct | ✓ verified |
-| F-52 | ceiling AUC 0.647 | 09 | `outputs/full/risk_scores.csv` | model=ceiling, period=all, roc_auc | - | direct | ✓ verified |
+| F-57 | 4.41% (also the dashed line) | 09 | `outputs/full/routing_summary.csv` | arm=sweep, window=peak, misroute_pct | - | direct | ✓ verified |
+| F-58 | 4.58% TRAP | 09 | `outputs/full/routing_summary.csv` | arm=ortools, window=peak, misroute_pct | - | direct | ✓ verified |
+| F-59 | 4.39% PICKED | 09 | `outputs/full/routing_summary.csv` | arm=ortools_risk, window=peak, misroute_pct | - | direct | ✓ verified |
+| F-60 | 4.32% | 09 | `outputs/full/routing_summary.csv` | arm=ortools_risk_500km, window=peak, misroute_pct | - | direct | ✓ verified |
+| F-61 | 4.33% | 09 | `outputs/full/routing_summary.csv` | arm=ortools_risk_2000km, window=peak, misroute_pct | - | direct | ✓ verified |
+| F-62 | +7.7% km | 09 | `outputs/full/routing_summary.csv` | total_km: ortools_risk_500km vs ortools, window=peak | (118,014.4 - 109,607.3) / 109,607.3 x 100 = +7.67% | derived | ✓ verified |
+| F-63 | +18.4% km | 09 | `outputs/full/routing_summary.csv` | total_km: ortools_risk_2000km vs ortools, window=peak | (129,783.1 - 109,607.3) / 109,607.3 x 100 = +18.41% | derived | ✓ verified |
+| F-64 | Quiet week too: 3.07% → 3.16% | 09 | `outputs/full/routing_summary.csv` | window=quiet, misroute_pct: sweep 3.065, ortools 3.163 | - | direct | ✓ verified |
+| F-65 | with 19.0% fewer km | 09 | `outputs/full/routing_summary.csv` | total_km: ortools_risk 113,937.7 vs sweep 140,683.4, window=peak | (113,937.7 - 140,683.4) / 140,683.4 x 100 = -19.01% | derived | ✓ verified |
+| F-66 | 150 km PICKED · 500 km · 2,000 km | 09 | `src/fleet_routing/config.py (MISROUTE_COST_KM, MISROUTE_COST_SWEEP_KM); cli.py _arms` | MISROUTE_COST_KM = 150.0 | - | direct | ✓ verified |
+| F-67 | routing.py moves risky stops forward, and a test checks it | 09 | `src/fleet_routing/routing.py:215-222 (position dimension, risk_slope cost); tests/test_routing.py:87` | position dimension + test | - | direct | ✓ verified |
+| F-68 | 109,607 km · fewest | 09 | `outputs/full/routing_summary.csv` | window=peak, min total_km | argmin total_km over peak arms = ortools | derived | ✓ verified |
 | F-53 | MIT | 10 | `LICENSE line 1` | - | - | direct | ✓ verified |
 | F-54 | ~18 min | 10 | `outputs/full/results.json` | runtime_seconds = 1063 | 1063 / 60 = 17.7 min | derived | ✓ verified |
 | F-55 | OR-Tools · XGBoost · statsmodels · Python | 10 | `pyproject.toml dependencies` | ortools, xgboost, statsmodels | - | direct | ✓ verified |
 | F-56 | $ make run | 10 | `Makefile` | run target | - | direct | ✓ verified |
 
-## 2. Automated check run (2026-10-14 13:44)
+## 2. Automated check run (2026-10-14 18:34)
 
 | ID | Expected on slide | Recomputed from repo | Result |
 |---|---|---|---|
@@ -107,7 +111,6 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-16 | true | true | ✓ pass |
 | F-17 | 200,000 | 200,000 | ✓ pass |
 | F-18 | 24k | 24k | ✓ pass |
-| F-19 | 0.094 | 0.094 | ✓ pass |
 | F-20 | true | true | ✓ pass |
 | F-21 | true | true | ✓ pass |
 | F-22 | true | true | ✓ pass |
@@ -134,13 +137,18 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-43 | 0.344 | 0.344 | ✓ pass |
 | F-44 | 8.7% | 8.7% | ✓ pass |
 | F-45 | 53.8% | 53.8% | ✓ pass |
-| F-46 | 16.6% | 16.6% | ✓ pass |
-| F-47 | 16.4% | 16.4% | ✓ pass |
-| F-48 | 15.8% | 15.8% | ✓ pass |
-| F-49 | 1.1% | 1.1% | ✓ pass |
-| F-50 | 0.645 | 0.645 | ✓ pass |
-| F-51 | 0.647 | 0.647 | ✓ pass |
-| F-52 | 0.647 | 0.647 | ✓ pass |
+| F-57 | 4.41% | 4.41% | ✓ pass |
+| F-58 | 4.58% | 4.58% | ✓ pass |
+| F-59 | 4.39% | 4.39% | ✓ pass |
+| F-60 | 4.32% | 4.32% | ✓ pass |
+| F-61 | 4.33% | 4.33% | ✓ pass |
+| F-62 | +7.7% | +7.7% | ✓ pass |
+| F-63 | +18.4% | +18.4% | ✓ pass |
+| F-64 | 3.07% → 3.16% | 3.07% → 3.16% | ✓ pass |
+| F-65 | 19.0% | 19.0% | ✓ pass |
+| F-66 | true | true | ✓ pass |
+| F-67 | true | true | ✓ pass |
+| F-68 | true | true | ✓ pass |
 | F-53 | true | true | ✓ pass |
 | F-54 | ~18 min | ~18 min | ✓ pass |
 | F-55 | true | true | ✓ pass |
@@ -151,20 +159,20 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | ID | Assumption | Source | Used by | Sensitivity: if this changes |
 |---|---|---|---|---|
 | A-01 | All data is synthetic, produced by a seeded generator sized to the production problem (300 trucks, 4 depots, 40 zones, 2 years of demand, 200,000 historical shipments). The production data is proprietary. | `src/fleet_routing/config.py:32-46 (FULL profile, seed=7); scripts/generate_data.py; README 'The data'` | all figures | figures all figures and slides 01, 02, 03, 04, 05, 06, 07, 08, 09, 10 change |
-| A-02 | Misroute risk rises with route position: the generator adds 0.09 log-odds per stop past the first, capped at 15 stops. The pipeline re-estimates it from history (0.094). | `src/fleet_routing/data.py:238-241 (position_logit); README 'Known limitations' (biggest gap)` | F-13, F-14, F-15, F-19, F-46, F-47, F-48, F-49 | figures F-13, F-14, F-15, F-19, F-46, F-47, F-48, F-49 and slides 04, 05, 09 change |
-| A-03 | A misroute is priced at 150 km inside the risk-priced router (cost per stop = 150 km x 0.094 x p(1-p) per position past the first). | `src/fleet_routing/config.py:90 (MISROUTE_COST_KM = 150.0); README 'The approach'` | F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36 | figures F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36 and slides 04, 06, 07 change |
-| A-04 | Each OR-Tools solve is capped at 6 s wall-clock per depot-day (1.5 s on the small profile). Results vary slightly run to run and with machine load. | `src/fleet_routing/config.py:45 (solver_seconds=6.0); routing.py:231; README 'Known limitations'` | F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40 | figures F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40 and slides 03, 05, 06, 07, 08 change |
-| A-05 | Distances are straight lines x 1.3 (circuity) at a flat 50 km/h. No road network, traffic or driver breaks. | `src/fleet_routing/config.py:74 (SPEED_KMH = 50.0), :76 (CIRCUITY = 1.3); README 'Known limitations'` | F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 | figures F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 and slides 06, 07, 08 change |
+| A-02 | Misroute risk rises with route position: the generator adds 0.09 log-odds per stop past the first, capped at 15 stops. The pipeline re-estimates it from history (0.094). | `src/fleet_routing/data.py:238-241 (position_logit); README 'Known limitations' (biggest gap)` | F-13, F-14, F-15, F-57, F-58, F-59, F-60, F-61, F-64 | figures F-13, F-14, F-15, F-57, F-58, F-59, F-60, F-61, F-64 and slides 04, 09 change |
+| A-03 | A misroute is priced at 150 km inside the risk-priced router (cost per stop = 150 km x 0.094 x p(1-p) per position past the first). | `src/fleet_routing/config.py:90 (MISROUTE_COST_KM = 150.0); README 'The approach'` | F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36, F-59, F-65, F-66 | figures F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36, F-59, F-65, F-66 and slides 04, 06, 07, 09 change |
+| A-04 | Each OR-Tools solve is capped at 6 s wall-clock per depot-day (1.5 s on the small profile). Results vary slightly run to run and with machine load. | `src/fleet_routing/config.py:45 (solver_seconds=6.0); routing.py:231; README 'Known limitations'` | F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40, F-57, F-58, F-59, F-60, F-61, F-62, F-63 | figures F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40, F-57, F-58, F-59, F-60, F-61, F-62, F-63 and slides 03, 05, 06, 07, 08, 09 change |
+| A-05 | Distances are straight lines x 1.3 (circuity) at a flat 50 km/h. No road network, traffic or driver breaks. | `src/fleet_routing/config.py:74 (SPEED_KMH = 50.0), :76 (CIRCUITY = 1.3); README 'Known limitations'` | F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 | figures F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 and slides 06, 07, 08, 09 change |
 | A-06 | Drivers leave the depot from 06:00 and must be back by 18:00. | `src/fleet_routing/config.py:72-73 (SHIFT_START, SHIFT_END); routing.py:205` | F-07, F-36 | figures F-07, F-36 and slides 02, 07 change |
 | A-07 | Delivery windows are hard constraints in OR-Tools (it drops a stop rather than arrive late) and are ignored by the sweep baseline, so the on-time comparison is lopsided by design. | `src/fleet_routing/routing.py:205-225; README 'Known limitations'` | F-11, F-34 | figures F-11, F-34 and slides 03, 07 change |
-| A-08 | A pre-dispatch call fixes the postcode, address and handwritten-label faults completely; it cannot fix a between-depots zone or a cross-dock relabel. | `src/fleet_routing/risk.py:134-142 (address_check); README 'Known limitations'` | F-46, F-47, F-48, F-49 | figures F-46, F-47, F-48, F-49 and slides 09 change |
-| A-09 | The dispatch office calls the top 5% of each day's consignees. | `src/fleet_routing/config.py:93 (ADDRESS_CHECK_SHARE = 0.05)` | F-21, F-46, F-47, F-48, F-49 | figures F-21, F-46, F-47, F-48, F-49 and slides 05, 09 change |
+| A-08 | A pre-dispatch call fixes the postcode, address and handwritten-label faults completely; it cannot fix a between-depots zone or a cross-dock relabel. | `src/fleet_routing/risk.py:134-142 (address_check); README 'Known limitations'` | F-21 | figures F-21 and slides 05 change |
+| A-09 | The dispatch office calls the top 5% of each day's consignees. | `src/fleet_routing/config.py:93 (ADDRESS_CHECK_SHARE = 0.05)` | F-21 | figures F-21 and slides 05 change |
 | A-10 | Trucks booked per depot-day = ceil(forecast orders x 2.1 pallets/stop x 1.10 headroom / (mean capacity x 0.85 fill)), capped at the depot fleet. | `src/fleet_routing/simulate.py:36-45 (roster_size); config.py:82-84` | F-44, F-45, F-32 | figures F-44, F-45, F-32 and slides 07, 08 change |
 | A-11 | Fleet mix: 70% tractors with 26 pallets, 30% rigids with 14 pallets; depot fleets 63 / 86 / 47 / 104. | `src/fleet_routing/config.py:67-69; data/full/depots.csv` | F-03, F-23, F-25, F-32, F-36 | figures F-03, F-23, F-25, F-32, F-36 and slides 02, 05, 06, 07, 08 change |
-| A-12 | Evaluation windows: quiet week 2025-10-13..17 and peak week 2025-12-08..12 (orders Mon-Fri, dispatched the next day, leftovers carried, up to 3 clear-out days). | `src/fleet_routing/config.py:43, :95 (CLEAR_OUT_DAYS = 3)` | F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 | figures F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 and slides 06, 08 change |
+| A-12 | Evaluation windows: quiet week 2025-10-13..17 and peak week 2025-12-08..12 (orders Mon-Fri, dispatched the next day, leftovers carried, up to 3 clear-out days). | `src/fleet_routing/config.py:43, :95 (CLEAR_OUT_DAYS = 3)` | F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 | figures F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 and slides 06, 08, 09 change |
 | A-13 | Forecasts are backtested from 12 weekly (Monday) origins over the last 12 weeks of 2025; every feature is at least a week old. | `src/fleet_routing/config.py:40, :44; forecast.py:166-183` | F-10, F-41, F-42, F-43, F-44, F-45 | figures F-10, F-41, F-42, F-43, F-44, F-45 and slides 03, 08 change |
-| A-14 | Router cost terms: a dropped stop costs 1,000 km x (1 + days waited); each truck used costs 40 km. | `src/fleet_routing/routing.py:32 (DROP_PENALTY_KM), :34 (VEHICLE_FIXED_KM)` | F-25, F-26, F-30, F-35, F-40 | figures F-25, F-26, F-30, F-35, F-40 and slides 06, 07, 08 change |
-| A-15 | Video rounding: percentages to 1 decimal, km and counts to whole numbers with thousands separators, WAPE and AUC to 3 decimals; '24k', '200k', '~18 min' are rounded labels. | `this audit (display convention)` | F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-46, F-47, F-48, F-49, F-50, F-51, F-52, F-54 | figures F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-46, F-47, F-48, F-49, F-50, F-51, F-52, F-54 and slides 04, 05, 06, 08, 09, 10 change |
+| A-14 | Router cost terms: a dropped stop costs 1,000 km x (1 + days waited); each truck used costs 40 km. | `src/fleet_routing/routing.py:32 (DROP_PENALTY_KM), :34 (VEHICLE_FIXED_KM)` | F-25, F-26, F-30, F-35, F-40 | figures F-25, F-26, F-30, F-35, F-40 and slides 06, 07, 08, 09 change |
+| A-15 | Video rounding: percentages to 1 decimal, km and counts to whole numbers with thousands separators, WAPE and AUC to 3 decimals; '24k', '200k', '~18 min' are rounded labels. | `this audit (display convention)` | F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-54, F-57, F-58, F-59, F-60, F-61, F-62, F-63, F-64, F-65 | figures F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-54, F-57, F-58, F-59, F-60, F-61, F-62, F-63, F-64, F-65 and slides 04, 05, 06, 08, 09, 10 change |
 | A-16 | Slide 01 (industry, everyday problems) is general logistics knowledge used as context. It is not a result of this repo and carries no numbers. | `author's framing; README 'The problem' supports problems 2-4` | F-01, F-02 | figures F-01, F-02 and slides 01 change |
 
 ## 4. Slide by slide
@@ -178,6 +186,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 01 · THE INDUSTRY  
 > Each evening, tomorrow's orders have to become routes.  
+> Who plans delivery routes every night, and the four problems they run into.  
 > WHO LIVES WITH THIS · Regional freight & 3PL carriers · Parcel & retail distribution · Grocery & e-commerce fleets  
 > 01 Thousands of stops, routed by hand or a simple heuristic — Every evening, against a deadline  
 > 02 Delivery windows and truck capacity collide — A tighter route can break a customer's slot  
@@ -201,15 +210,17 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Edit the chips (#ctx-c1..3) and cards (#ctx-k1..4) in compositions/s01-context.html. (project folder `docs/demo/source`).
 
 ### Slide 02: This project  
-*6.8-11.6 s · composition `compositions/s02-hook.html`*
+*6.8-12.0 s · composition `compositions/s02-hook.html`*
 
 ![Slide 02](slides/slide-02.jpg)
 
 **On-screen text (verbatim)**
 
 > 02 · THIS PROJECT  
+> The project in one line: a big fleet, thousands of orders, one night to plan them.  
 > 300 trucks, 4 depots. Up to 2,800 orders a day. One evening to route them.  
 > every stop has a delivery window · trailer capacity + shift limits · >5% of peak shipments misrouted  
+> Misrouted = sent to the wrong depot, truck or door, so it needs a second delivery.  
 
 **Figures on this slide**
 
@@ -233,7 +244,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Headline spans #hook-l1..l3 and chips #hook-f1..f3 in compositions/s02-hook.html; fleet/depots come from config.py FULL profile. (project folder `docs/demo/source`).
 
 ### Slide 03: How it works (white chapter, slide A)  
-*11.3-19.3 s · composition `compositions/explainer.html (CONFIG.blocks, CONFIG.groups, CONFIG.loop)`*
+*11.7-19.7 s · composition `compositions/explainer.html (CONFIG.blocks, CONFIG.groups, CONFIG.loop)`*
 
 ![Slide 03](slides/slide-03.jpg)
 
@@ -241,6 +252,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 03 · HOW IT WORKS  
 > From orders to routes  
+> Read left to right: forecast demand, book drivers, flag risky stops, then the optimizer builds the routes.  
 > ORDERS stops + time windows → [EVERY MONDAY: FORECAST how busy is next week? → BOOK DRIVERS trucks per depot] → [EVERY EVENING: RISK CHECK which stops may go wrong? → OPTIMIZER OR-Tools, 6 s per depot] → ROUTES OUT ✓ windows kept ✓ fewer km ✓ fewer trucks  
 > build, score, improve (loop over the optimizer)  
 
@@ -263,7 +275,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Edit CONFIG in compositions/explainer.html; badge truth comes from routing_summary.csv (F-11). (project folder `docs/demo/source`).
 
 ### Slide 04: The key idea (white chapter, slide B)  
-*19.3-26.3 s · composition `compositions/explainer.html (#ex-b ...)`*
+*19.7-26.7 s · composition `compositions/explainer.html (#ex-b ...)`*
 
 ![Slide 04](slides/slide-04.jpg)
 
@@ -271,6 +283,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 04 · THE KEY IDEA  
 > Pricing risk into the route  
+> One truck, four stops. The optimizer weighs extra km against the chance a late stop gets misrouted.  
 > Every stop gets a misroute risk — predicted from past shipments, before dispatch  
 > Later stops are riskier — they sit deeper in the trailer  
 > The optimizer charges extra km for a risky stop placed late — so it moves that stop forward  
@@ -294,7 +307,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Markup under #ex-b in compositions/explainer.html; the footnote figures are F-14 and F-15. (project folder `docs/demo/source`).
 
 ### Slide 05: Architecture  
-*26.0-38.8 s · composition `compositions/s03-architecture.html`*
+*26.4-39.2 s · composition `compositions/s03-architecture.html`*
 
 ![Slide 05](slides/slide-05.jpg)
 
@@ -302,10 +315,11 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 05 · ARCHITECTURE  
 > Three models feed one dispatcher. One replay scores everything.  
-> data.py · seeded generator: Zone demand (2 yrs × 40 zones), Shipments (200k history), Orders (24k · time windows)  
+> Each box is a file in the repo. Data flows left to right; one replay scores every plan the same way.  
+> data.py · seeded generator: Zone demand (2 yrs × 40 zones), Shipments (200k past shipments), Orders (24k · time windows)  
 > forecast.py Demand forecast (XGBoost vs ETS · SARIMA) → simulate.py Driver roster (trucks per depot-day)  
-> risk.py Misroute-risk model (XGBoost · p(misroute)) · +0.094 log-odds / stop  
-> routing.py OR-Tools CVRPTW (capacity · windows · shift · + misroute risk priced in km · solve budget 6.0 s) → Routes (per depot-day) → replay() Replay (km · on-time · misroutes)  
+> risk.py Misroute-risk model (XGBoost · chance of misroute) · later stops are riskier  
+> routing.py OR-Tools route solver (capacity · windows · shift · + misroute risk priced in km · solve budget 6.0 s) → Routes (per depot-day) → replay() Replay (km · on-time · misroutes)  
 > undelivered → rollover, age +1 · risk.py Address check (call top 5% before loading)  
 > Legend: data · models · optimizer · evaluation · risk lever  
 
@@ -318,7 +332,6 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | F-16 | 2 yrs x 40 zones | `data/full/zone_demand.csv; outputs/full/results.json zones` · 731 daily rows 2024-01-01..2025-12-31; zones = 40 | - | ✓ |
 | F-17 | 200k history | `data/full/shipments_history.csv` · row count | - | ✓ |
 | F-18 | 24k | `outputs/full/results.json` · dispatch_orders = 24,394 | 24,394 rounded to thousands | ✓ |
-| F-19 | +0.094 log-odds / stop | `outputs/full/results.json` · position_effect_logodds_per_stop | - | ✓ |
 | F-20 | forecast.py, risk.py, simulate.py, routing.py, replay(), data.py | `src/fleet_routing/` · files + def replay | - | ✓ |
 | F-21 | call top 5% before loading | `src/fleet_routing/config.py:93` · ADDRESS_CHECK_SHARE = 0.05 | - | ✓ |
 
@@ -331,7 +344,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Node boxes (#n-*) and the wires array in compositions/s03-architecture.html. (project folder `docs/demo/source`).
 
 ### Slide 06: The system running  
-*38.4-53.0 s · composition `compositions/s04-routes.html; assets/map-sweep.png, assets/map-ortools.png (from outputs/full/route_map.png via tools/darkmap.py)`*
+*38.8-53.4 s · composition `compositions/s04-routes.html; assets/map-sweep.png, assets/map-ortools.png (from outputs/full/route_map.png via tools/darkmap.py)`*
 
 ![Slide 06](slides/slide-06a.jpg)
 
@@ -341,8 +354,11 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 06 · THE SYSTEM RUNNING  
 > Same depot, same peak day, two dispatchers.  
+> Each line is one truck's route out of the depot (white square). Less line = fewer km.  
 > Depot 3 · dispatch 2025-12-09 · ○ high predicted misroute risk  
-> Sweep + nearest neighbour: 104 trucks · 11,368 km | OR-Tools CVRPTW, risk-priced: 93 trucks · 8,574 km | −24.6% km  
+> Sweep baseline: fill trucks by direction: 104 trucks · 11,368 km | OR-Tools solver, risk-priced: 93 trucks · 8,574 km | −24.6% km  
+> The whole peak week, all four depots.  
+> Total road km every truck drove that week, sweep vs plain OR-Tools. Fewer km is better.  
 > PEAK WEEK · ALL 4 DEPOTS · 13,554 ORDERS — 140,683 → 109,607 km, −22.1% (sweep vs OR-Tools bars)  
 
 **Figures on this slide**
@@ -372,7 +388,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Map captions (#routes-cap-l/r, #routes-chip) and counter (#routes-wk-num, #routes-bar) in compositions/s04-routes.html; maps come from make run → outputs/full/route_map.png. (project folder `docs/demo/source`).
 
 ### Slide 07: End-user value (white)  
-*52.7-65.7 s · composition `compositions/value.html (SHEET block injected by tools/inject_sheet.py)`*
+*53.1-66.1 s · composition `compositions/value.html (SHEET block injected by tools/inject_sheet.py)`*
 
 ![Slide 07](slides/slide-07.jpg)
 
@@ -380,6 +396,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 07 · END-USER VALUE  
 > What the dispatcher gets  
+> Each row is one truck's day: leave time, stops, first and last arrival, km driven, back at the depot.  
 > DISPATCH SHEET · DEPOT 3 · 2025-12-09 — columns TRUCK, DRIVER, OUT, STOPS, SHIPMENTS, FIRST, LAST, KM, BACK  
 > T-013 Driver 01 06:00 12 S013242 +11 08:00 14:00 179 15:21  
 > T-025 Driver 02 06:00 15 S013393 +14 08:00 15:11 198 15:54  
@@ -414,7 +431,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 **To change this slide:** Re-run tools/export_dispatch_sheet.py, then tools/inject_sheet.py (--rows / --animate pick the trucks); layout in compositions/value.html. (project folder `docs/demo/source`).
 
 ### Slide 08: Results  
-*65.4-74.2 s · composition `compositions/s05-results.html (stats array)`*
+*65.8-74.6 s · composition `compositions/s05-results.html (stats array)`*
 
 ![Slide 08](slides/slide-08.jpg)
 
@@ -422,11 +439,12 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 > 08 · RESULTS · TWO REPLAYED WEEKS  
 > Fewer km, fewer trucks, enough drivers booked.  
+> Changes are OR-Tools vs the sweep. WAPE = forecast error as a share of real orders. Lower is better on all four.  
 > OPTIMIZER −22.1% road km, peak week · 140,683 → 109,607  
 > OPTIMIZER −8.1% truck-days, peak week · 1,457 → 1,339  
 > FORECAST 0.208 zone-demand WAPE, XGBoost · ETS 0.260 · naive 0.344  
 > FORECAST 8.7% peak depot-days short of trucks · ETS forecast: 53.8%  
-> 4 depots · 300 trucks · 40 zones · every number from one replay function  
+> 4 depots · 300 trucks · 40 zones · every routing number comes from one replay that re-drives the finished routes  
 
 **Figures on this slide**
 
@@ -455,42 +473,56 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 
 **To change this slide:** The stats array and card text in compositions/s05-results.html. (project folder `docs/demo/source`).
 
-### Slide 09: What didn't win  
-*73.8-80.0 s · composition `compositions/s06-twist.html`*
+### Slide 09: Lesson and fix  
+*74.2-83.2 s · composition `compositions/s06-twist.html`*
 
 ![Slide 09](slides/slide-09.jpg)
 
 **On-screen text (verbatim)**
 
-> 09 · WHAT DIDN'T WIN  
-> The XGBoost risk model ties a two-line supervisor rule.  
-> Peak misroutes cut by calling the top 5% of consignees before loading  
-> Supervisor rule (postcode, then address) 16.6% · XGBoost (ROC-AUC 0.645) 16.4% · Logistic regression (ROC-AUC 0.647) 15.8% · Random 5% 1.1%  
-> Why: the label caps both models (ceiling AUC 0.647). Next step: train on fixable faults only.  
+> 09 · LESSON AND FIX  
+> Tighter routes misroute more. So I priced the risk into routing.  
+> Peak week, all 4 depots. Misroute rate = share of shipments sent to the wrong place; lower is better.  
+> THE LESSON · The fewest-km plan misroutes the most · Misroute rate · dashed line = sweep baseline  
+> Sweep baseline (140,683 km) 4.41% · Plain OR-Tools (109,607 km · fewest) 4.58% TRAP  
+> Packing more stops per truck puts more parcels deep in the trailer. Quiet week too: 3.07% → 3.16%.  
+> THE FIX, IN THE REPO · Charge km for a risky stop placed late · One misroute priced at · km vs unpriced OR-Tools  
+> 150 km (+4.0% km) 4.39% PICKED · 500 km (+7.7% km) 4.32% · 2,000 km (+18.4% km) 4.33%  
+> routing.py moves risky stops forward, and a test checks it. Higher prices buy almost nothing more.  
+> PAYOFF · Misroutes 4.58% → 4.39%, under the sweep's 4.41%, with 19.0% fewer km · trailer effect simulated  
 
 **Figures on this slide**
 
 | ID | Shown | Source · key | Calculation | Check |
 |---|---|---|---|---|
-| F-21 | call top 5% before loading | `src/fleet_routing/config.py:93` · ADDRESS_CHECK_SHARE = 0.05 | - | ✓ |
-| F-46 | 16.6% | `outputs/full/address_checks.csv` · ranked_by=rule, window=peak, reduction_pct | - | ✓ |
-| F-47 | 16.4% | `outputs/full/address_checks.csv` · ranked_by=xgboost, window=peak, reduction_pct | - | ✓ |
-| F-48 | 15.8% | `outputs/full/address_checks.csv` · ranked_by=logistic, window=peak, reduction_pct | - | ✓ |
-| F-49 | 1.1% | `outputs/full/address_checks.csv` · ranked_by=random, window=peak, reduction_pct | - | ✓ |
-| F-50 | ROC-AUC 0.645 | `outputs/full/risk_scores.csv` · model=xgboost, period=all, roc_auc | - | ✓ |
-| F-51 | ROC-AUC 0.647 | `outputs/full/risk_scores.csv` · model=logistic, period=all, roc_auc | - | ✓ |
-| F-52 | ceiling AUC 0.647 | `outputs/full/risk_scores.csv` · model=ceiling, period=all, roc_auc | - | ✓ |
+| F-15 | +4.0% km | `outputs/full/routing_summary.csv` · window=peak, total_km: ortools_risk 113,937.7, ortools 109,607.3 | (113,937.7 - 109,607.3) / 109,607.3 x 100 = +3.95% | ✓ |
+| F-29 | 140,683 km | `outputs/full/routing_summary.csv` · arm=sweep, window=peak, total_km | - | ✓ |
+| F-30 | 109,607 km | `outputs/full/routing_summary.csv` · arm=ortools, window=peak, total_km | - | ✓ |
+| F-57 | 4.41% (also the dashed line) | `outputs/full/routing_summary.csv` · arm=sweep, window=peak, misroute_pct | - | ✓ |
+| F-58 | 4.58% TRAP | `outputs/full/routing_summary.csv` · arm=ortools, window=peak, misroute_pct | - | ✓ |
+| F-59 | 4.39% PICKED | `outputs/full/routing_summary.csv` · arm=ortools_risk, window=peak, misroute_pct | - | ✓ |
+| F-60 | 4.32% | `outputs/full/routing_summary.csv` · arm=ortools_risk_500km, window=peak, misroute_pct | - | ✓ |
+| F-61 | 4.33% | `outputs/full/routing_summary.csv` · arm=ortools_risk_2000km, window=peak, misroute_pct | - | ✓ |
+| F-62 | +7.7% km | `outputs/full/routing_summary.csv` · total_km: ortools_risk_500km vs ortools, window=peak | (118,014.4 - 109,607.3) / 109,607.3 x 100 = +7.67% | ✓ |
+| F-63 | +18.4% km | `outputs/full/routing_summary.csv` · total_km: ortools_risk_2000km vs ortools, window=peak | (129,783.1 - 109,607.3) / 109,607.3 x 100 = +18.41% | ✓ |
+| F-64 | Quiet week too: 3.07% → 3.16% | `outputs/full/routing_summary.csv` · window=quiet, misroute_pct: sweep 3.065, ortools 3.163 | - | ✓ |
+| F-65 | with 19.0% fewer km | `outputs/full/routing_summary.csv` · total_km: ortools_risk 113,937.7 vs sweep 140,683.4, window=peak | (113,937.7 - 140,683.4) / 140,683.4 x 100 = -19.01% | ✓ |
+| F-66 | 150 km PICKED · 500 km · 2,000 km | `src/fleet_routing/config.py (MISROUTE_COST_KM, MISROUTE_COST_SWEEP_KM); cli.py _arms` · MISROUTE_COST_KM = 150.0 | - | ✓ |
+| F-67 | routing.py moves risky stops forward, and a test checks it | `src/fleet_routing/routing.py:215-222 (position dimension, risk_slope cost); tests/test_routing.py:87` · position dimension + test | - | ✓ |
+| F-68 | 109,607 km · fewest | `outputs/full/routing_summary.csv` · window=peak, min total_km | argmin total_km over peak arms = ortools | ✓ |
 
-**Assumptions:** A-02, A-08, A-09, A-15
+**Assumptions:** A-02, A-03, A-04, A-05, A-12, A-15
 
 **Illustrative, not data:**
 
-- Bar lengths: 1,000 px track = 20% reduction.
+- Bar lengths: one shared scale in both panels, 5% misroute rate = 260 px track; the dashed marker sits at the sweep's 4.41%.
+- Colour: every bar is neutral grey except the shipped 150 km setting (mint, PICKED); coral is used only for the TRAP label and the lesson tag.
+- 'More parcels deep in the trailer' is the mechanism written into the generator (A-02), not a measured fact about real trailers.
 
-**To change this slide:** Rows #twist-r1..r4 (bar widths are inline styles) in compositions/s06-twist.html. (project folder `docs/demo/source`).
+**To change this slide:** Rows #twist-l1..l2 and #twist-r1..r3 (bar widths are inline styles, 52 px per 1%) and #twist-payoff in compositions/s06-twist.html. (project folder `docs/demo/source`).
 
 ### Slide 10: End card  
-*79.6-84.0 s · composition `compositions/s07-end.html`*
+*82.8-87.2 s · composition `compositions/s07-end.html`*
 
 ![Slide 10](slides/slide-10.jpg)
 
@@ -501,6 +533,7 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 > github.com/kavya2693/fleet-routing-cvrp  
 > OR-Tools · XGBoost · statsmodels · Python  
 > $ make run   # 300 trucks, 4 depots, ~18 min  
+> One command rebuilds every table the numbers in this video come from.  
 
 **Figures on this slide**
 
@@ -524,20 +557,20 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 | Input / assumption | Affected figures | Affected slides | Files to edit | Commands to re-run |
 |---|---|---|---|---|
 | A-01: All data is synthetic, produced by a seeded generator sized to the production problem (300 trucks, 4 depots, 40 zones, 2 years of demand, 200,000 historical shipments) | all figures | 01, 02, 03, 04, 05, 06, 07, 08, 09, 10 | `src/fleet_routing/config.py (FULL profile); src/fleet_routing/data.py` | `make data; make run` |
-| A-02: Misroute risk rises with route position: the generator adds 0 | F-13, F-14, F-15, F-19, F-46, F-47, F-48, F-49 | 04, 05, 09 | `src/fleet_routing/data.py:241` | `make data; make run` |
-| A-03: A misroute is priced at 150 km inside the risk-priced router (cost per stop = 150 km x 0 | F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36 | 04, 06, 07 | `src/fleet_routing/config.py:90` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
-| A-04: Each OR-Tools solve is capped at 6 s wall-clock per depot-day (1 | F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40 | 03, 05, 06, 07, 08 | `src/fleet_routing/config.py:45` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
-| A-05: Distances are straight lines x 1 | F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 | 06, 07, 08 | `src/fleet_routing/config.py:74-76` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
+| A-02: Misroute risk rises with route position: the generator adds 0 | F-13, F-14, F-15, F-57, F-58, F-59, F-60, F-61, F-64 | 04, 09 | `src/fleet_routing/data.py:241` | `make data; make run` |
+| A-03: A misroute is priced at 150 km inside the risk-priced router (cost per stop = 150 km x 0 | F-14, F-15, F-23, F-24, F-25, F-26, F-27, F-32, F-33, F-34, F-35, F-36, F-59, F-65, F-66 | 04, 06, 07, 09 | `src/fleet_routing/config.py:90` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
+| A-04: Each OR-Tools solve is capped at 6 s wall-clock per depot-day (1 | F-09, F-25, F-26, F-30, F-31, F-35, F-38, F-40, F-57, F-58, F-59, F-60, F-61, F-62, F-63 | 03, 05, 06, 07, 08, 09 | `src/fleet_routing/config.py:45` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
+| A-05: Distances are straight lines x 1 | F-24, F-26, F-27, F-29, F-30, F-31, F-35, F-36 | 06, 07, 08, 09 | `src/fleet_routing/config.py:74-76` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
 | A-06: Drivers leave the depot from 06:00 and must be back by 18:00 | F-07, F-36 | 02, 07 | `src/fleet_routing/config.py:72-73` | `make run; export_dispatch_sheet.py + inject_sheet.py` |
 | A-07: Delivery windows are hard constraints in OR-Tools (it drops a stop rather than arrive late) and are ignored by the sweep baseline, so the on-time comparison is lopsided by design | F-11, F-34 | 03, 07 | `src/fleet_routing/routing.py` | `make run` |
-| A-08: A pre-dispatch call fixes the postcode, address and handwritten-label faults completely; it cannot fix a between-depots zone or a cross-dock relabel | F-46, F-47, F-48, F-49 | 09 | `src/fleet_routing/risk.py:134-142` | `make run` |
-| A-09: The dispatch office calls the top 5% of each day's consignees | F-21, F-46, F-47, F-48, F-49 | 05, 09 | `src/fleet_routing/config.py:93` | `make run` |
+| A-08: A pre-dispatch call fixes the postcode, address and handwritten-label faults completely; it cannot fix a between-depots zone or a cross-dock relabel | F-21 | 05 | `src/fleet_routing/risk.py:134-142` | `make run` |
+| A-09: The dispatch office calls the top 5% of each day's consignees | F-21 | 05 | `src/fleet_routing/config.py:93` | `make run` |
 | A-10: Trucks booked per depot-day = ceil(forecast orders x 2 | F-44, F-45, F-32 | 07, 08 | `src/fleet_routing/config.py:82-84` | `make run` |
 | A-11: Fleet mix: 70% tractors with 26 pallets, 30% rigids with 14 pallets; depot fleets 63 / 86 / 47 / 104 | F-03, F-23, F-25, F-32, F-36 | 02, 05, 06, 07, 08 | `src/fleet_routing/config.py:67-69` | `make data; make run` |
-| A-12: Evaluation windows: quiet week 2025-10-13 | F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 | 06, 08 | `src/fleet_routing/config.py:43` | `make run` |
+| A-12: Evaluation windows: quiet week 2025-10-13 | F-28, F-28, F-29, F-30, F-31, F-38, F-39, F-40 | 06, 08, 09 | `src/fleet_routing/config.py:43` | `make run` |
 | A-13: Forecasts are backtested from 12 weekly (Monday) origins over the last 12 weeks of 2025; every feature is at least a week old | F-10, F-41, F-42, F-43, F-44, F-45 | 03, 08 | `src/fleet_routing/config.py:44` | `make run` |
-| A-14: Router cost terms: a dropped stop costs 1,000 km x (1 + days waited); each truck used costs 40 km | F-25, F-26, F-30, F-35, F-40 | 06, 07, 08 | `src/fleet_routing/routing.py:32-34` | `make run` |
-| A-15: Video rounding: percentages to 1 decimal, km and counts to whole numbers with thousands separators, WAPE and AUC to 3 decimals; '24k', '200k', '~18 min' are rounded labels | F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-46, F-47, F-48, F-49, F-50, F-51, F-52, F-54 | 04, 05, 06, 08, 09, 10 | `the composition file named on each slide` | `hyperframes render` |
+| A-14: Router cost terms: a dropped stop costs 1,000 km x (1 + days waited); each truck used costs 40 km | F-25, F-26, F-30, F-35, F-40 | 06, 07, 08, 09 | `src/fleet_routing/routing.py:32-34` | `make run` |
+| A-15: Video rounding: percentages to 1 decimal, km and counts to whole numbers with thousands separators, WAPE and AUC to 3 decimals; '24k', '200k', '~18 min' are rounded labels | F-14, F-15, F-18, F-27, F-31, F-38, F-41, F-42, F-43, F-44, F-45, F-54, F-57, F-58, F-59, F-60, F-61, F-62, F-63, F-64, F-65 | 04, 05, 06, 08, 09, 10 | `the composition file named on each slide` | `hyperframes render` |
 | A-16: Slide 01 (industry, everyday problems) is general logistics knowledge used as context | F-01, F-02 | 01 | `compositions/s01-context.html` | `hyperframes render` |
 
 ## 6. Known differences and caveats
@@ -550,6 +583,9 @@ python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/fact
 - Slide 01 statements are general industry knowledge (A-16).
 - Route-position misroute risk is a mechanism written into the generator (A-02); its real size must be measured on real route histories before the routing-side misroute numbers mean anything (README 'Known limitations').
 - Driver names on slide 07 are placeholders.
+- Slide 09 no longer shows the address-check comparison: the XGBoost misroute model ties a two-line supervisor rule at picking the top 5% of consignees to call before loading (16.4% vs 16.6% fewer peak misroutes; ROC-AUC 0.645 against a 0.647 ceiling). The repo implements no fix for that tie; its next step (train the risk model on fixable faults only) is in README 'Insights and learning'. The README still reports the full table in 'The result' (items 4-5) and 'At a glance: What didn't win', and outputs/full/address_checks.csv and risk_scores.csv hold the numbers.
+- Slide 09's payoff (4.58% → 4.39%) is real replay output, but the effect it corrects (later stops are riskier) is written into the generator; README 'Known limitations' names this as the biggest gap. Pricing risk is a weak lever: higher prices (500 km, 2,000 km) cut misroutes only to 4.32-4.33% for +7.7% to +18.4% km.
+- The 0.094 log-odds-per-stop position estimate is no longer printed on slide 05 (shown in plain words as 'later stops are riskier'); it remains in outputs/full/results.json and the README.
 
 ## Appendix: environment
 

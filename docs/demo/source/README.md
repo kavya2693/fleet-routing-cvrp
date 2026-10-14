@@ -49,7 +49,7 @@ PYTHONPATH=src .venv/bin/python docs/demo/source/tools/export_dispatch_sheet.py 
 python3 docs/demo/source/tools/inject_sheet.py docs/demo/source/assets/dispatch_sheet.json \
   docs/demo/source/compositions/value.html --rows 12,24,30,34,38,53 --animate 24,30,34,53
 
-# 3. render (84 s, 1920x1080, 30 fps, silent) and compress
+# 3. render (87.2 s, 1920x1080, 30 fps, silent) and compress
 cd docs/demo/source
 npx --yes hyperframes@0.8.156 check
 npx --yes hyperframes@0.8.156 render -f 30 -q looks -o renders/fleet-routing-cvrp-master.mp4

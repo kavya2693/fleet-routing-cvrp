@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14 13:44",
+ "generated": "2026-10-14 18:34",
  "commit": "c9b3c09d094cd863c61c2af426513b6d9b33ba68",
  "checks": [
   {
@@ -144,14 +144,6 @@
    "type": "direct",
    "computed": "24k",
    "expect": "24k",
-   "status": "pass"
-  },
-  {
-   "id": "F-19",
-   "shown": "+0.094 log-odds / stop",
-   "type": "direct",
-   "computed": "0.094",
-   "expect": "0.094",
    "status": "pass"
   },
   {
@@ -363,59 +355,99 @@
    "status": "pass"
   },
   {
-   "id": "F-46",
-   "shown": "16.6%",
+   "id": "F-57",
+   "shown": "4.41% (also the dashed line)",
    "type": "direct",
-   "computed": "16.6%",
-   "expect": "16.6%",
+   "computed": "4.41%",
+   "expect": "4.41%",
    "status": "pass"
   },
   {
-   "id": "F-47",
-   "shown": "16.4%",
+   "id": "F-58",
+   "shown": "4.58% TRAP",
    "type": "direct",
-   "computed": "16.4%",
-   "expect": "16.4%",
+   "computed": "4.58%",
+   "expect": "4.58%",
    "status": "pass"
   },
   {
-   "id": "F-48",
-   "shown": "15.8%",
+   "id": "F-59",
+   "shown": "4.39% PICKED",
    "type": "direct",
-   "computed": "15.8%",
-   "expect": "15.8%",
+   "computed": "4.39%",
+   "expect": "4.39%",
    "status": "pass"
   },
   {
-   "id": "F-49",
-   "shown": "1.1%",
+   "id": "F-60",
+   "shown": "4.32%",
    "type": "direct",
-   "computed": "1.1%",
-   "expect": "1.1%",
+   "computed": "4.32%",
+   "expect": "4.32%",
    "status": "pass"
   },
   {
-   "id": "F-50",
-   "shown": "ROC-AUC 0.645",
+   "id": "F-61",
+   "shown": "4.33%",
    "type": "direct",
-   "computed": "0.645",
-   "expect": "0.645",
+   "computed": "4.33%",
+   "expect": "4.33%",
    "status": "pass"
   },
   {
-   "id": "F-51",
-   "shown": "ROC-AUC 0.647",
-   "type": "direct",
-   "computed": "0.647",
-   "expect": "0.647",
+   "id": "F-62",
+   "shown": "+7.7% km",
+   "type": "derived",
+   "computed": "+7.7%",
+   "expect": "+7.7%",
    "status": "pass"
   },
   {
-   "id": "F-52",
-   "shown": "ceiling AUC 0.647",
+   "id": "F-63",
+   "shown": "+18.4% km",
+   "type": "derived",
+   "computed": "+18.4%",
+   "expect": "+18.4%",
+   "status": "pass"
+  },
+  {
+   "id": "F-64",
+   "shown": "Quiet week too: 3.07% \u2192 3.16%",
    "type": "direct",
-   "computed": "0.647",
-   "expect": "0.647",
+   "computed": "3.07% \u2192 3.16%",
+   "expect": "3.07% \u2192 3.16%",
+   "status": "pass"
+  },
+  {
+   "id": "F-65",
+   "shown": "with 19.0% fewer km",
+   "type": "derived",
+   "computed": "19.0%",
+   "expect": "19.0%",
+   "status": "pass"
+  },
+  {
+   "id": "F-66",
+   "shown": "150 km PICKED \u00b7 500 km \u00b7 2,000 km",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-67",
+   "shown": "routing.py moves risky stops forward, and a test checks it",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-68",
+   "shown": "109,607 km \u00b7 fewest",
+   "type": "derived",
+   "computed": "true",
+   "expect": "true",
    "status": "pass"
   },
   {

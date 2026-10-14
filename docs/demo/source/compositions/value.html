@@ -8,7 +8,7 @@
            person using it (right). Data is inlined by tools/inject_sheet.py between the SHEET markers. */
         #value-root {
           position: absolute; inset: 0;
-          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #6b7280; --w-line: #d1d5db; --w-faint: #f3f4f6;
+          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #4b5563; --w-line: #d1d5db; --w-faint: #f3f4f6;
           --w-data: #d97706; --w-model: #6d3cf0; --w-tools: #1f8fa8; --w-risk: #dc2b4a; --w-opt: #0f9f6e;
           color: var(--w-ink); font-family: Inter, "Helvetica Neue", sans-serif;
         }
@@ -27,7 +27,7 @@
 
         /* sheet */
         #value-root .sheet {
-          position: absolute; left: 120px; top: 280px; width: 1050px; height: 640px; border: 3px solid var(--w-line);
+          position: absolute; left: 120px; top: 300px; width: 1050px; height: 620px; border: 3px solid var(--w-line);
           border-radius: 24px; background: #fff; box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08); overflow: hidden;
         }
         #value-root .sheet-head {
@@ -36,22 +36,22 @@
         }
         #value-root .sheet-head span:last-child { color: #c4b5fd; }
         #value-root .row {
-          position: relative; display: flex; align-items: center; height: 64px; padding: 0 26px;
-          font-family: "JetBrains Mono", monospace; font-size: 21px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
+          position: relative; display: flex; align-items: center; height: 60px; padding: 0 26px;
+          font-family: "JetBrains Mono", monospace; font-size: 22px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
         }
-        #value-root .row.hdr { height: 54px; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: var(--w-mute); background: #fafafa; }
+        #value-root .row.hdr { height: 54px; font-size: 22px; font-weight: 700; letter-spacing: 0.02em; color: var(--w-mute); background: #fafafa; }
         #value-root .row .tint { position: absolute; inset: 0; opacity: 0; }
         #value-root .c { position: relative; white-space: nowrap; }
         #value-root .c1 { width: 128px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
         #value-root .c1 i { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--w-line); }
         #value-root .c2 { width: 138px; font-family: Inter, sans-serif; font-size: 22px; }
-        #value-root .c3 { width: 82px; }
-        #value-root .c4 { width: 74px; text-align: right; padding-right: 18px; }
-        #value-root .c5 { width: 196px; color: var(--w-soft); }
+        #value-root .c3 { width: 76px; }
+        #value-root .c4 { width: 86px; text-align: right; padding-right: 12px; }
+        #value-root .c5 { width: 190px; padding-left: 14px; color: var(--w-soft); }
         #value-root .c6, #value-root .c7 { width: 92px; }
         #value-root .c8 { width: 84px; text-align: right; padding-right: 14px; }
         #value-root .c9 { width: 80px; }
-        #value-root .more { padding: 14px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 20px; color: var(--w-mute); }
+        #value-root .more { padding: 14px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 22px; color: var(--w-mute); }
         #value-root .totals {
           position: absolute; left: 0; bottom: 0; width: 100%; height: 66px; display: flex; align-items: center; gap: 14px; padding: 0 30px;
           background: #ecfdf5; border-top: 2px solid #a7f3d0; font-size: 23px; font-weight: 700; color: #065f46;
@@ -60,15 +60,16 @@
         #value-root .totals svg { position: absolute; left: 6px; top: 6px; width: 16px; height: 16px; }
 
         /* scene */
-        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); }
-        #value-root .dock { position: absolute; left: 1220px; top: 312px; width: 600px; height: 128px; border-radius: 20px; background: var(--w-faint); }
+        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); }
+        #value-root .dock { position: absolute; left: 1220px; top: 332px; width: 600px; height: 128px; border-radius: 20px; background: var(--w-faint); }
         #value-root .map {
-          position: absolute; left: 1220px; top: 462px; width: 600px; height: 458px; border-radius: 24px; border: 3px solid var(--w-line);
+          position: absolute; left: 1220px; top: 482px; width: 600px; height: 438px; border-radius: 24px; border: 3px solid var(--w-line);
           background-color: #fbfbfc;
           background-image: linear-gradient(#eef0f3 2px, transparent 2px), linear-gradient(90deg, #eef0f3 2px, transparent 2px);
           background-size: 48px 48px; overflow: hidden;
         }
         #value-root svg.layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #value-root .subt { position: absolute; left: 120px; top: 246px; width: 1680px; font-size: 28px; font-weight: 500; color: var(--w-soft); }
         #value-root .caption {
           position: absolute; left: 120px; top: 944px; width: 1700px; font-size: 30px; font-weight: 700; color: var(--w-ink);
         }
@@ -80,11 +81,12 @@
           <div class="kick" id="va-kick">07 · END-USER VALUE</div>
           <div class="ttl" id="va-ttl">What the <em>dispatcher</em> gets</div>
           <div class="uline" id="va-ul"></div>
+          <div class="subt" id="va-sub">Each row is one truck's day: leave time, stops, first and last arrival, km driven, back at the depot.</div>
 
           <div class="sheet" id="va-sheet">
             <div class="sheet-head"><span id="va-head-l">DISPATCH SHEET</span><span id="va-head-r"></span></div>
             <div class="row hdr" id="va-hdr">
-              <div class="c c1">TRUCK</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 18px">DRIVER</div>
+              <div class="c c1">TRUCK</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 22px">DRIVER</div>
               <div class="c c3">OUT</div><div class="c c4">STOPS</div><div class="c c5">SHIPMENTS</div>
               <div class="c c6">FIRST</div><div class="c c7">LAST</div><div class="c c8">KM</div><div class="c c9">BACK</div>
             </div>
@@ -93,10 +95,10 @@
             <div class="totals" id="va-totals"></div>
           </div>
 
-          <div class="scene-lab" id="va-lab-dock" style="left: 1220px; top: 280px">DEPOT · LOADING DOCK</div>
+          <div class="scene-lab" id="va-lab-dock" style="left: 1220px; top: 300px">DEPOT · LOADING DOCK</div>
           <div class="dock" id="va-dock"></div>
           <div class="map" id="va-map"></div>
-          <div class="scene-lab" id="va-lab-map" style="left: 1244px; top: 476px">TODAY'S ROUTES</div>
+          <div class="scene-lab" id="va-lab-map" style="left: 1244px; top: 496px">TODAY'S ROUTES</div>
           <svg class="layer" id="va-svg" viewBox="0 0 1920 1080"></svg>
 
           <div class="caption" id="va-caption">Every truck leaves with a loaded, ordered stop list and arrival times. <span>No evening of routing by hand.</span></div>
@@ -111,10 +113,10 @@
           const CONFIG = {
             duration: 13.0,
             colors: ["#6d3cf0", "#d97706", "#1f8fa8", "#2563eb"], // one per animated truck
-            map: { left: 1220, top: 462, w: 600, h: 458, pad: 34 }, // fitted to the animated routes, centred on the depot
-            dockY: 376,
+            map: { left: 1220, top: 482, w: 600, h: 438, pad: 34 }, // fitted to the animated routes, centred on the depot
+            dockY: 396,
             dockX: [1395, 1500, 1605, 1710],
-            person: { x: 1262, y: 376 },
+            person: { x: 1262, y: 396 },
           };
           const NS = "http://www.w3.org/2000/svg";
           const svg = document.getElementById("va-svg");
@@ -173,7 +175,7 @@
           // depot marker on the map
           const depot = el("g", { id: "va-depot" });
           el("rect", { x: M.cx - 22, y: M.cy - 22, width: 44, height: 44, rx: 10, fill: "#111827" }, depot);
-          const dt = el("text", { x: M.cx, y: M.cy + 7, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace", "font-size": 18, "font-weight": 700, fill: "#fff" }, depot);
+          const dt = el("text", { x: M.cx, y: M.cy + 7, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace", "font-size": 22, "font-weight": 700, fill: "#fff" }, depot);
           dt.textContent = "D" + SHEET.depot;
 
           const animRows = SHEET.rows.map((r, i) => ({ r, i })).filter((o) => o.r.animate >= 0);
@@ -239,6 +241,7 @@
           tl.fromTo("#va-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
           tl.fromTo("#va-ttl", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.55);
           tl.fromTo("#va-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.9);
+          tl.fromTo("#va-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.0);
           tl.fromTo("#va-sheet", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.8);
           SHEET.rows.forEach((_, i) => tl.fromTo("#va-r" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 1.3 + i * 0.3));
           tl.fromTo("#va-more", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3 + SHEET.rows.length * 0.3);
@@ -248,6 +251,8 @@
           tl.fromTo("#va-paper", { rotation: 0 }, { rotation: -10, svgOrigin: CONFIG.person.x + 31 + " " + (CONFIG.person.y + 6), duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 7 }, 2.1);
           tl.fromTo("#va-depot", { opacity: 0, scale: 0.8, svgOrigin: CONFIG.map.cx + " " + CONFIG.map.cy }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, 1.5);
           tl.fromTo("#va-caption", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 9.6);
+          // all text fades fully out before the wipe, so no two slides' text is ever on screen together
+          tl.to(["#va-kick", "#va-ttl", "#va-ul", "#va-sub", "#va-sheet", "#va-lab-dock", "#va-dock", "#va-map", "#va-lab-map", "#va-svg", "#va-caption"], { opacity: 0, duration: 0.35, ease: "power2.in" }, D - 1.05);
           // wipe out (white -> dark), revealing the next dark scene underneath
           tl.to("#va-page", { clipPath: "inset(0px 0px 0px 100%)", duration: 0.7, ease: "power3.inOut" }, D - 0.7);
           tl.fromTo("#va-edge", { x: 0, opacity: 0 }, { x: 1920, opacity: 1, duration: 0.7, ease: "power3.inOut", immediateRender: false }, D - 0.7);
