@@ -8,6 +8,10 @@ Next-day routes for a 300-truck regional freight fleet: book drivers from a zone
 demand forecast, route a few thousand time-windowed stops a day with OR-Tools, and find out
 which lever actually cuts misrouted shipments in the pre-holiday peak.
 
+[![56-second silent walkthrough: the industry problem, the architecture, the routes and the results](docs/demo/demo.gif)](docs/demo/demo.mp4)
+
+*56-second silent walkthrough. Click for the full video ([MP4, 5 MB](docs/demo/demo.mp4)).*
+
 ## The problem
 
 A regional freight operator runs about 300 trucks out of four depots and delivers about 2,200
